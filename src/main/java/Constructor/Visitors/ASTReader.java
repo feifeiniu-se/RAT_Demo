@@ -17,8 +17,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.ToolFactory;
-import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -54,10 +52,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 public class ASTReader {
     protected static final String FREE_MARKER_GENERATED = "generated using freemarker";
     protected static final String FREE_MARKER_GENERATED_2 = "generated using FreeMarker";
-    protected UMLModel umlModel;
 
-    public ASTReader(Map<String, String> javaFileContents, Set<String> repositoryDirectories) {
-        umlModel = new UMLModel(repositoryDirectories);
+    public ASTReader(Map<String, String> javaFileContents) {
         processJavaFileContents(javaFileContents);
     }
 
@@ -120,13 +116,9 @@ public class ASTReader {
         }
     }
 
-    public UMLModel getUmlModel() {
-        return umlModel;
-    }
 
     protected void processCompilationUnit(String sourceFilePath, CompilationUnit compilationUnit, String javaFileContent) {
         List<UMLComment> comments = extractInternalComments(compilationUnit, sourceFilePath, javaFileContent);
-        umlModel.getCommentMap().put(sourceFilePath, comments);
         PackageDeclaration packageDeclaration = compilationUnit.getPackage();
         String packageName = null;
         UMLJavadoc packageDoc = null;
@@ -270,7 +262,6 @@ public class ASTReader {
                 UMLType umlType = UMLType.extractTypeObject(cu, sourceFile, interfaceType, 0);
                 UMLRealization umlRealization = new UMLRealization(umlClass, umlType.getClassType());
                 umlClass.addImplementedInterface(umlType);
-                getUmlModel().addRealization(umlRealization);
             }
 
             List<EnumConstantDeclaration> enumConstantDeclarations = enumDeclaration.enumConstants();
@@ -297,7 +288,6 @@ public class ASTReader {
                 }
             }
 
-            getUmlModel().addClass(umlClass);
             distributeComments(comments, locationInfo, umlClass.getComments());
         }
     }
@@ -402,7 +392,6 @@ public class ASTReader {
                 UMLType umlType = UMLType.extractTypeObject(cu, sourceFile, superclassType, 0);
                 UMLGeneralization umlGeneralization = new UMLGeneralization(umlClass, umlType.getClassType());
                 umlClass.setSuperclass(umlType);
-                getUmlModel().addGeneralization(umlGeneralization);
             }
 
             List<Type> superInterfaceTypes = typeDeclaration.superInterfaceTypes();
@@ -413,7 +402,6 @@ public class ASTReader {
                 UMLType umlType = UMLType.extractTypeObject(cu, sourceFile, interfaceType, 0);
                 UMLRealization umlRealization = new UMLRealization(umlClass, umlType.getClassType());
                 umlClass.addImplementedInterface(umlType);
-                getUmlModel().addRealization(umlRealization);
             }
 
             Map<BodyDeclaration, VariableDeclarationContainer> map = processBodyDeclarations(cu, typeDeclaration, packageName, sourceFile, importedTypes, umlClass, packageDoc, comments);
@@ -431,7 +419,6 @@ public class ASTReader {
                 }
             }
 
-            getUmlModel().addClass(umlClass);
             distributeComments(comments, locationInfo, umlClass.getComments());
         }
     }

@@ -7,11 +7,9 @@ import Model.CodeBlock;
 import Model.CommitCodeChange;
 import Model.MethodTime;
 import gr.uom.java.xmi.*;
-import gr.uom.java.xmi.decomposition.VariableDeclaration;
 import org.eclipse.jdt.core.dom.*;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class MethodAndAttributeVisitor {
     private List<CodeBlock> codeBlocks;
@@ -19,18 +17,18 @@ public class MethodAndAttributeVisitor {
     private CommitCodeChange commitCodeChange;
     private ClassVisitor classVisitor;
 
-    public void methodAAttributeVisitor(Map<String, String> javaFileContents, Set<String> repositoryDirectories, List<CodeBlock> codeBlocks, List<CommitCodeChange> codeChange, HashMap<String, CodeBlock> mappings, ClassVisitor classVisitor){
+    public void methodAAttributeVisitor(Map<String, String> javaFileContents, List<CodeBlock> codeBlocks, List<CommitCodeChange> codeChange, HashMap<String, CodeBlock> mappings, ClassVisitor classVisitor){
         this.codeBlocks = codeBlocks;
         this.mappings = mappings;
         this.commitCodeChange = codeChange.get(codeChange.size() - 1); //获得当前commit的内容
         this.classVisitor = classVisitor;
 
-        Reader reader= new Reader(javaFileContents, repositoryDirectories);
+        Reader reader= new Reader(javaFileContents);
     }
 
     private class Reader extends ASTReader {
-        public Reader(Map<String, String> javaFileContents, Set<String> repositoryDirectories) {
-            super(javaFileContents, repositoryDirectories);
+        public Reader(Map<String, String> javaFileContents) {
+            super(javaFileContents);
         }
 
         @Override
@@ -79,46 +77,6 @@ public class MethodAndAttributeVisitor {
             }
         }
 
-        @Override
-        protected UMLAnonymousClass processAnonymousClassDeclaration(CompilationUnit cu, AnonymousClassDeclaration anonymous, String packageName, String binaryName, String codePath, String sourceFile, List<UMLComment> comments, List<UMLImport> importedTypes) {
-            List<BodyDeclaration> bodyDeclarations = anonymous.bodyDeclarations();
-            LocationInfo locationInfo = generateLocationInfo(cu, sourceFile, anonymous, LocationInfo.CodeElementType.ANONYMOUS_CLASS_DECLARATION);
-            UMLAnonymousClass anonymousClass = new UMLAnonymousClass(packageName, binaryName, codePath, locationInfo, importedTypes);
-            Iterator var12 = bodyDeclarations.iterator();
-
-            while(true) {
-                while(var12.hasNext()) {
-                    BodyDeclaration bodyDeclaration = (BodyDeclaration)var12.next();
-                    if (bodyDeclaration instanceof FieldDeclaration) {
-                        FieldDeclaration fieldDeclaration = (FieldDeclaration)bodyDeclaration;
-                        List<UMLAttribute> attributes = processFieldDeclaration(cu, fieldDeclaration, false, sourceFile, comments);
-                        Iterator var16 = attributes.iterator();
-
-                        while(var16.hasNext()) {
-                            UMLAttribute attribute = (UMLAttribute)var16.next();
-                            attribute.setClassName(anonymousClass.getCodePath());
-                            attribute.setAnonymousClassContainer(anonymousClass);
-                            anonymousClass.addAttribute(attribute);
-                        }
-                    } else if (bodyDeclaration instanceof MethodDeclaration) {
-                        MethodDeclaration methodDeclaration = (MethodDeclaration)bodyDeclaration;
-                        UMLOperation operation = processMethodDeclaration(cu, methodDeclaration, packageName, false, sourceFile, comments);
-                        operation.setClassName(anonymousClass.getCodePath());
-                        operation.setAnonymousClassContainer(anonymousClass);
-                        anonymousClass.addOperation(operation);
-                    } else if (bodyDeclaration instanceof Initializer) {
-                        Initializer initializer = (Initializer)bodyDeclaration;
-                        UMLInitializer umlInitializer = processInitializer(cu, initializer, packageName, false, sourceFile, comments);
-                        umlInitializer.setClassName(anonymousClass.getCodePath());
-                        umlInitializer.setAnonymousClassContainer(anonymousClass);
-                        anonymousClass.addInitializer(umlInitializer);
-                    }
-                }
-
-                distributeComments(comments, locationInfo, anonymousClass.getComments());
-                return anonymousClass;
-            }
-        }
     }
 
     private void methodVisitor(UMLOperation umlOperation) {
@@ -155,11 +113,6 @@ public class MethodAndAttributeVisitor {
 
         String methodName = sb.toString();
         String signature_method = signature + ":" + methodName;
-
-        if(signature_method.contains("testDifferentVersionWarning")){
-            System.out.println(114514);
-            System.out.println(signature_method);
-        }
 
         //处理完毕，生成CodeBlock和CodeBlockTime
         if (!mappings.containsKey(signature_method)) {

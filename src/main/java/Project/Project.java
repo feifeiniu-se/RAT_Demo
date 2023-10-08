@@ -1,8 +1,6 @@
 package Project;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.StringWriter;
+import java.io.*;
 import java.util.*;
 
 import Constructor.Enums.FileType;
@@ -11,17 +9,18 @@ import Project.RefactoringMiner.Refactorings;
 import Project.Utils.CommitHashCode;
 import Project.Utils.DiffFile;
 import Project.Utils.GenerateJsonFiles;
+import Project.Utils.LocalFileDiff;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import lombok.Data;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.diff.DiffConfig;
 import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.diff.RenameDetector;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.ObjectLoader;
-import org.eclipse.jgit.lib.ObjectReader;
-import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -43,11 +42,12 @@ public class Project {
     String refactoringMinerAddress;
     HashMap<String, Refactorings> refactorings;
     List<CommitHashCode> commitList;
+    HashMap<String, String> metrics;
+    HashMap<String, String> entropy;
     private static GitService gitService = new GitServiceImpl();
 
 
     public Project(String[] info) {
-        //命令行待添加
 //        projectAddress = info[0];
 //        name = projectAddress.substring(projectAddress.lastIndexOf("\\")+1);
 
@@ -60,6 +60,8 @@ public class Project {
         refactoringMinerAddress = "C:\\dataset\\jitfine\\A-refactorings\\" + name + ".json";
         commitList = getList();
         refactorings = readRefactoring();
+        metrics = new HashMap<>();
+        entropy = new HashMap<>();
     }
 
     //return the list of commit hashcode between startHash and endHash
@@ -206,19 +208,7 @@ public class Project {
                 if (diffs.size() < 1) {
                     return null;
                 }
-//                RenameDetector  renameDetector = new RenameDetector(repository);
-//                renameDetector.addAll(diffs);
-//                List<DiffEntry> x = renameDetector.compute();
-//                for(DiffEntry dt: x){
-//                    if(dt.getChangeType().equals("RENAME")){
-//                        System.out.println("OK");
-//                    }
-//                }
-
-
-//                System.out.println("Found: " + diffs.size() + " differences");
                 for (DiffEntry diff : diffs) {
-                    //newCode.containsKey()
                     if (diff.getChangeType().name().equals("DELETE")) {
                         res.put(diff.getOldPath(), new DiffFile(FileType.valueOf(diff.getChangeType().name()), diff.getNewPath(), newCode.get(diff.getNewPath()), diff.getOldPath(), oldCode.get(diff.getOldPath())));
                     } else {
@@ -227,9 +217,6 @@ public class Project {
                         }
 
                     }
-//                    System.out.println("Diff: " + diff.getChangeType() + ": " +
-//                            (diff.getOldPath().equals(diff.getNewPath()) ? diff.getNewPath() : diff.getOldPath() + " -> " + diff.getNewPath()));
-//            System.out.println(diff);
                 }
 
             } catch (IOException e) {
@@ -242,6 +229,81 @@ public class Project {
 
         return res;
 
+    }
+
+    //return the list of <oldFile, newFile>, which stands for the parent file and current file
+    public List<LocalFileDiff> getLocalDiffFileList(CommitHashCode commitHash) {
+        List<LocalFileDiff> res = new ArrayList<>();
+
+        String parent = commitHash.getParent();
+        String hashCode = commitHash.getHashCode();
+
+        if (parent == null) {
+            //this is the first commit
+            Map<String, String> sourceCode = getSourceCode(hashCode);//all the java code and it's name during this commit
+            // set all the files as add
+            if (sourceCode.size() < 1) {
+                return null;
+            }// no new java file
+            for (Map.Entry<String, String> entry : sourceCode.entrySet()) {
+                LocalFileDiff f= new LocalFileDiff(entry.getKey(), entry.getValue(), hashCode);
+                res.add(f);
+            }
+        } else {
+            Map<String, String> oldCode = getSourceCode(parent);
+            Map<String, String> newCode = getSourceCode(hashCode);
+
+            try(Git git = Git.open(new File(projectAddress)); Repository repository = git.getRepository();){
+                res = getDiffBetweenCommits(repository, git, parent, hashCode, oldCode, newCode);
+            } catch (GitAPIException e) {
+                throw new RuntimeException(e);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return res;
+    }
+
+    public List<LocalFileDiff> getDiffBetweenCommits(Repository repository, Git git, String oldCommit, String newCommit, Map<String, String> oldCode, Map<String, String> newCode) throws IOException, GitAPIException {
+
+        AbstractTreeIterator oldTree = prepareTreeParser(repository, oldCommit);
+        AbstractTreeIterator newTree = prepareTreeParser(repository, newCommit);
+        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+        //get the list of changed file
+        List<DiffEntry> diff = git.diff()
+                .setOldTree(oldTree)
+                .setNewTree(newTree)
+                .setPathFilter(PathSuffixFilter.create(".java"))
+                .call();
+        // for detecting rename
+        Config config = new Config();
+        config.setBoolean("diff", null, "renames", true);
+        DiffConfig diffConfig = config.get(DiffConfig.KEY); // for rename detection
+        try (TreeWalk treeWalk = new TreeWalk(repository)) {
+            RenameDetector rd = new RenameDetector(treeWalk.getObjectReader(), diffConfig);
+            rd.addAll(diff);
+            diff = rd.compute();
+        } // so far, file status includes: add, delete, rename, copy
+
+        List<LocalFileDiff> res=new ArrayList<>();
+        for (DiffEntry entry : diff) {
+            DiffFormatter formatter = new DiffFormatter(byteStream) ;
+            formatter.setRepository(repository);
+            formatter.format(entry);
+
+            String mid=byteStream.toString();
+            byteStream.reset();
+            LocalFileDiff f= new LocalFileDiff(entry);
+            f.setPatch(mid);
+            f.setSha(newCommit);
+            f.setOldContent(oldCode.get(f.getOldFilePath()));
+            f.setContent(newCode.get(f.getFilePath()));
+            f.patchParser(); //obtain
+            f.fileParser();
+            res.add(f);
+        }
+        return res;
     }
 
     private static AbstractTreeIterator prepareTreeParser(Repository repository, String objectId) throws IOException {
@@ -260,5 +322,77 @@ public class Project {
 
             return treeParser;
         }
+    }
+
+    public void save(){
+        String filePath = "C:\\dataset\\jitfine\\redefine\\"+name+".csv";
+        try {
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath), "UTF-8"));
+            for(Map.Entry<String, String> entry: metrics.entrySet()){
+                writer.write(entry.getKey());
+                writer.write(",");
+                String values[] = entry.getValue().split("\\s|\\;");
+                for(String i: values){
+                    if(!i.isEmpty()){
+                        writer.write(i);
+                        writer.write(",");
+                    }
+                }
+                writer.newLine();
+            }
+            writer.flush();
+            writer.close();
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println(metrics.size());
+    }
+    public void save_entropy(){
+        String filePath = "C:\\dataset\\jitfine\\redefine\\entropy_"+name+".csv";
+        try {
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath), "UTF-8"));
+            for(Map.Entry<String, String> entry: entropy.entrySet()){
+                writer.write(entry.getKey());
+                writer.write(",");
+                String values[] = entry.getValue().split("\\;");
+                for(String i: values){
+                    if(!i.isEmpty()){
+                        writer.write(i);
+                        writer.write(",");
+                    }
+                }
+                writer.newLine();
+            }
+            writer.flush();
+            writer.close();
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println(entropy.size());
+    }
+
+    public void save_code(HashMap<String, String> code){
+        String filePath = "C:\\dataset\\jitfine\\redefine\\"+name+"_code.json";
+
+        try {
+            FileWriter writer = new FileWriter(filePath);
+            Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+            gson.toJson(code, writer);
+            writer.flush();
+            writer.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        System.out.println(metrics.size());
+
     }
 }

@@ -4,6 +4,8 @@ package Constructor.Enums;
 import Model.*;
 import Project.RefactoringMiner.Refactoring;
 import Project.RefactoringMiner.SideLocation;
+import Project.Utils.LocalFileDiff;
+import Project.Utils.Metric;
 
 import javax.security.auth.callback.PasswordCallback;
 import java.awt.*;
@@ -16,6 +18,7 @@ import static Constructor.Utils.cutString;
 import static Constructor.Utils.*;
 
 public enum Operator {
+
     Add_Package {
         @Override
         public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {

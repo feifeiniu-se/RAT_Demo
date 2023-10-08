@@ -8,16 +8,13 @@ import Model.CommitCodeChange;
 import gr.uom.java.xmi.UMLComment;
 import gr.uom.java.xmi.UMLImport;
 import gr.uom.java.xmi.UMLJavadoc;
-import gr.uom.java.xmi.UMLModelASTReader;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jgit.api.SubmoduleUpdateCommand;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 
 public class ClassVisitor {
@@ -26,19 +23,19 @@ public class ClassVisitor {
     private CommitCodeChange commitCodeChange;
     private HashMap<String, String[]> residualClassMap;
 
-    public void classVisitor(Map<String, String> javaFileContents, Set<String> repositoryDirectories, List<CodeBlock> codeBlocks, List<CommitCodeChange> codeChange, HashMap<String, CodeBlock> mappings) {
+    public void classVisitor(Map<String, String> javaFileContents, List<CodeBlock> codeBlocks, List<CommitCodeChange> codeChange, HashMap<String, CodeBlock> mappings) {
         this.codeBlocks = codeBlocks;
         this.mappings = mappings;
         this.commitCodeChange = codeChange.get(codeChange.size() - 1); //获得当前commit的内容
         this.residualClassMap = new HashMap<>();
 
-        Reader reader= new Reader(javaFileContents, repositoryDirectories);
+        Reader reader= new Reader(javaFileContents);
     }
 
 
     private class Reader extends ASTReader {
-        public Reader(Map<String, String> javaFileContents, Set<String> repositoryDirectories) {
-            super(javaFileContents, repositoryDirectories);
+        public Reader(Map<String, String> javaFileContents) {
+            super(javaFileContents);
         }
 
         @Override

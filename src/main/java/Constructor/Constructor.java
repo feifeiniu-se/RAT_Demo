@@ -1,13 +1,11 @@
 package Constructor;
 
-import Constructor.Enums.FileType;
-import Constructor.Enums.Operator;
+import Constructor.Enums.*;
 import Constructor.Visitors.*;
 import Model.*;
 import Project.RefactoringMiner.Refactoring;
 import Project.RefactoringMiner.Refactorings;
-import Project.Utils.CommitHashCode;
-import Project.Utils.DiffFile;
+import Project.Utils.*;
 import lombok.Data;
 import Project.Project;
 
@@ -28,9 +26,8 @@ public class Constructor {
 
     public void start(){
         List<CommitHashCode> commitList = project.getCommitList();
+        HashMap<String, String> code = new HashMap<>();
         for(CommitHashCode hashCode: commitList){
-//            System.out.println(codeBlocks.size());
-//            System.out.println(mappings.size());
             System.out.println("Commit: "+hashCode.getHashCode());
             //add a new commitTime for each commit, for the code change during this commit
             CommitCodeChange commitTime = new CommitCodeChange(hashCode.getHashCode());
@@ -42,6 +39,11 @@ public class Constructor {
             }
             codeChange.add(commitTime);
 
+            //generate localFileDiff
+            //todo：确认与diffFile的关系
+            List<LocalFileDiff> diffList = project.getLocalDiffFileList(hashCode); //obtain line number of code change
+            Metric metric = new Metric();
+
             //go through all the files and refactorings
             HashMap<String, DiffFile> fileList1 =  project.getDiffList(hashCode);
             if(fileList1==null){continue;}//no file changes during this commit
@@ -52,10 +54,12 @@ public class Constructor {
             //if refactoring is not null, separate them into three levels: package, class, method&attribute
             Refactorings refact = project.getRefactorings().get(hashCode.getHashCode());
 
-            //生成ASTReader所需参数
+            //generate the parameter of ASTReader
             Map<String, String> fileContents = fileList.entrySet().stream()
                     .collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue().getContent()));
-            Set<String> repositoryDirectories = populateDirectories(fileContents);
+//            Map<String, String> fileContents = diffList.stream()
+//                    .filter(p -> p.getStatus().equals("ADD") || p.getStatus().equals("Modify"))
+//                    .collect(Collectors.toMap(LocalFileDiff::getFilePath, LocalFileDiff::getContent));
 
             //packageLevel: firstly refactorings, then javaParser visitor
             System.out.println("--------Package Level--------");
@@ -65,20 +69,13 @@ public class Constructor {
                     if (!packageLevelRefactorings.isEmpty()) {
                         for(Refactoring r: packageLevelRefactorings){
                             Operator.valueOf(r.getType().replace(" ", "_")).apply(codeBlocks, mappings, r, commitTime, null);
+                            ComponentOperator.valueOf(r.getType().replace(" ", "_")).apply(metric, diffList, r);
                         }
                     }
                 }
             }
-//            if(!fileList.isEmpty()) {
-//                for (Map.Entry<String, DiffFile> file : fileList.entrySet()) {
-////                    System.out.println(file.getValue().getPath());
-//                    String fileContent = file.getValue().getContent();
-//                    PackageVisitor pkgVisitor = new PackageVisitor();
-//                    pkgVisitor.packageVisitor(fileContent, codeBlocks, codeChange, mappings);
-//                }
-//            }
             PackageVisitor packageVisitor = new PackageVisitor();
-            packageVisitor.packageVisitor(fileContents, repositoryDirectories, codeBlocks, codeChange, mappings);
+            packageVisitor.packageVisitor(fileContents, codeBlocks, codeChange, mappings);
             updateMappings(mappings, codeBlocks);
 
             System.out.println("--------Class Level--------");
@@ -90,21 +87,14 @@ public class Constructor {
                     if (!classLevelRefactorings.isEmpty()) {
                         for(Refactoring r: classLevelRefactorings){
                             Operator.valueOf(r.getType().replace(" ", "_")).apply(codeBlocks, mappings, r, commitTime, null);
+                            ComponentOperator.valueOf(r.getType().replace(" ", "_")).apply(metric, diffList, r);
                         }
                     }
                 }
             }
-//            if(!fileList.isEmpty()) {
-//                for (Map.Entry<String, DiffFile> file : fileList.entrySet()) {
-//                    String fileContent = file.getValue().getContent();
-//                    ClassVisitor classVisitor = new ClassVisitor();
-////                    System.out.println(file.getValue().getPath());
-//                    classVisitor.classVisitor(fileContent, codeBlocks, codeChange, mappings);
-//                }
-//            }
             ClassVisitor classVisitor = new ClassVisitor();
-            classVisitor.classVisitor(fileContents, repositoryDirectories, codeBlocks, codeChange, mappings);
-//            updateMappings(mappings, codeBlocks);
+            classVisitor.classVisitor(fileContents, codeBlocks, codeChange, mappings);
+            updateMappings(mappings, codeBlocks);
 //            //method and attribute level: firstly refactoring, then javaparser visitor
             System.out.println("--------Method Level--------");
             if (refact != null && commitTime.getPreCommit() != null) {
@@ -114,6 +104,7 @@ public class Constructor {
                     if (!methodAndAttributeLevelRefactorings.isEmpty()) {
                         for(Refactoring r: methodAndAttributeLevelRefactorings){
                             Operator.valueOf(r.getType().replace(" ", "_")).apply(codeBlocks, mappings, r, commitTime, null);
+                            ComponentOperator.valueOf(r.getType().replace(" ", "_")).apply(metric, diffList, r);
                         }
                     }
                     //parameters & return type
@@ -121,22 +112,26 @@ public class Constructor {
                     if (!parameterLevelRefactorings.isEmpty()) {
                         for(Refactoring r: parameterLevelRefactorings){
                             Operator.valueOf(r.getType().replace(" ", "_")).apply(codeBlocks, mappings, r, commitTime, null);
+                            ComponentOperator.valueOf(r.getType().replace(" ", "_")).apply(metric, diffList, r);
                         }
                     }
 
                 }
             }
-//            if(!fileList.isEmpty()){
-//                for(Map.Entry<String, DiffFile> file: fileList.entrySet()){
-//                    String fileContent = file.getValue().getContent();
-//                    MethodAndAttributeVisitor methodAndAttributeVisitor = new MethodAndAttributeVisitor();//including inner class, method, attribute
-//                    methodAndAttributeVisitor.methodAAttributeVisitor(fileContent, codeBlocks, codeChange, mappings);
-//                }
-//            }
             MethodAndAttributeVisitor methodAndAttributeVisitor = new MethodAndAttributeVisitor();
-            methodAndAttributeVisitor.methodAAttributeVisitor(fileContents, repositoryDirectories, codeBlocks, codeChange, mappings, classVisitor);
+            methodAndAttributeVisitor.methodAAttributeVisitor(fileContents, codeBlocks, codeChange, mappings, classVisitor);
             classVisitor.processResidualClass();
             updateMappings(mappings, codeBlocks);
+
+            if(refact != null && commitTime.getPreCommit() != null){
+                // metric label
+                for(LocalFileDiff dfl: diffList){
+                    dfl.label(metric);
+                }
+                project.getMetrics().put(hashCode.getHashCode(), metric.count());
+                code.put(hashCode.getHashCode(), calculate(diffList));//obtain code content
+                project.getEntropy().put(hashCode.getHashCode(), compute_entropy(diffList));//calculate entropy
+            }
         }
     }
 
@@ -146,20 +141,101 @@ public class Constructor {
         }
     }
 
-    private static Set<String> populateDirectories(Map<String, String> fileContents) {
-        Set<String> repositoryDirectories = new LinkedHashSet();
-        Iterator var2 = fileContents.keySet().iterator();
+    public String compute_entropy(List<LocalFileDiff> diffList){
+        String res = "";
 
-        while(var2.hasNext()) {
-            String path = (String)var2.next();
-            String directory = new String(path);
+        List<Integer> methods_new = new ArrayList<>();
+        List<Integer> class_new = new ArrayList<>();
+        List<Integer> methods_old = new ArrayList<>();
+        List<Integer> class_old = new ArrayList<>();
+        for(LocalFileDiff dfl: diffList){
+            if(dfl.getComponents()!=null){
+                for(Component c: dfl.getComponents()){
+                    int count = 0;
+                    if(c.getType().equals(CompTypeEnum.M)||c.getType().equals(CompTypeEnum.C)){
+                        count = 0;
+                        for(Map.Entry<Integer, OpeTypeEnum> entry: c.getChangedLines().entrySet()){
+                            if(dfl.getCodeChangeLineNum().contains(entry.getKey())){
+                                count++;
+                            }
+                        }if(count==0){
+                            continue;
+                        }
+                        if(c.getType().equals(CompTypeEnum.M)){
+                            methods_new.add(count);
+                        }else if(c.getType().equals(CompTypeEnum.C)){
+                            class_new.add(count);
+                        }
+                    }
+                }
+            }
 
-            while(directory.contains("/")) {
-                directory = directory.substring(0, directory.lastIndexOf("/"));
-                repositoryDirectories.add(directory);
+            if(dfl.getOldComponents()!=null){
+                for(Component c: dfl.getOldComponents()){
+                    int count = 0;
+                    if(c.getType().equals(CompTypeEnum.M)||c.getType().equals(CompTypeEnum.C)){
+                        count = 0;
+                        if(c.getType().equals(CompTypeEnum.M)||c.getType().equals(CompTypeEnum.C)){
+                            count = 0;
+                            for(Map.Entry<Integer, OpeTypeEnum> entry: c.getChangedLines().entrySet()){
+                                if(dfl.getOldCodeChangeLineNum().contains(entry.getKey())){
+                                    count++;
+                                }
+                            }
+                            if(count==0){
+                                continue;
+                            }
+                            if(c.getType().equals(CompTypeEnum.M)){
+                                methods_old.add(count);
+                            }else if(c.getType().equals(CompTypeEnum.C)){
+                                class_old.add(count);
+                            }
+                        }
+                    }
+                }
             }
         }
-
-        return repositoryDirectories;
+        res = res + Double.toString(calculate_entropy(class_new))+";"+Double.toString(calculate_entropy(class_old))+";"+Double.toString(calculate_entropy(methods_new))+";"+Double.toString(calculate_entropy(methods_old));
+        return res;
+    }
+    private double calculate_entropy(List<Integer> counts){
+        double entropy  = 0;
+        if(counts.size()==0){
+            return 0;
+        }
+        int totalLOCModified = counts.stream().reduce(Integer::sum).orElse(0);
+        if(totalLOCModified==0){
+            return 0;
+        }
+        for(Integer c: counts){
+            double avg = (double)c/(double)totalLOCModified;
+            entropy -= (avg*Math.log(avg)/Math.log(2));
+        }
+        return entropy;
+    }
+    public String calculate(List<LocalFileDiff> diffList) {
+        String res = "";
+        String add = "";
+        String delete = "";
+        String refact_d = "";
+        String refact_a = "";
+        String move_a = "";
+        String move_d = "";
+        String add_all = "";
+        String delete_all = "";
+//        <operation, code>
+        for (LocalFileDiff dfl : diffList) {
+            HashMap<String, String> fileCode = dfl.labelCode();
+            add = add + fileCode.get("ADD");
+            delete = delete + fileCode.get("DEL");
+            refact_a = refact_a + fileCode.get("REF_A");
+            refact_d = refact_d + fileCode.get("REF_D");
+            move_a = move_a + fileCode.get("MOV_A");
+            move_d = move_d + fileCode.get("MOV_D");
+            add_all = add_all + fileCode.get("ADD_ALL");
+            delete_all = delete_all + fileCode.get("DEL_ALL");
+        }
+        res = res+"[CLS]"+add+"[CLS]"+delete+"[CLS]"+refact_a+"[CLS]"+refact_d+"[CLS]"+move_a+"[CLS]"+move_d+"[CLS]"+add_all+"[CLS]"+delete_all+"[CLS]";
+        return res;
     }
 }
