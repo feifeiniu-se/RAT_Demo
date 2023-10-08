@@ -665,46 +665,46 @@ public enum Operator {
 
             // move from oldClassTime to newClassTime
             //todo 为了只处理类级别 将此处注释掉
-            assert r.rightFilter("extracted type declaration").size() == 1;//假设右侧只有一个类，如果有多个的话，就说明是有内部类
-            List<SideLocation> extractedMethod = r.rightFilter("extracted method declaration");
-            for (SideLocation s : extractedMethod) {
-                HashMap<String, String> methodInfo = s.parseMethodDeclaration();
-                assert mappings.containsKey(originSigOld + ":" + methodInfo.get("MN"));
-                CodeBlock methodBlock = mappings.get(originSigOld + ":" + methodInfo.get("MN"));
-                mappings.put(newSig + ":" + methodInfo.get("MN"), methodBlock);
-
-                MethodTime methodTime = (MethodTime) methodBlock.getLastHistory().clone();
-                methodTime.setTime(commitTime);
-                methodTime.setRefactorType(Extract_Class);
-                methodTime.setParentCodeBlock(classBlock);
-                methodBlock.addHistory(methodTime);
-                commitTime.addCodeChange(methodTime);
-//               remove from old class, add to new class
-//                assert oldClassTime.getMethods().contains(methodBlock);
-                oldClassTime.getMethods().remove(methodBlock);
-                classTime.getMethods().add(methodBlock);
-            }
+//            assert r.rightFilter("extracted type declaration").size() == 1;//假设右侧只有一个类，如果有多个的话，就说明是有内部类
+//            List<SideLocation> extractedMethod = r.rightFilter("extracted method declaration");
+//            for (SideLocation s : extractedMethod) {
+//                HashMap<String, String> methodInfo = s.parseMethodDeclaration();
+//                assert mappings.containsKey(originSigOld + ":" + methodInfo.get("MN"));
+//                CodeBlock methodBlock = mappings.get(originSigOld + ":" + methodInfo.get("MN"));
+//                mappings.put(newSig + ":" + methodInfo.get("MN"), methodBlock);
+//
+//                MethodTime methodTime = (MethodTime) methodBlock.getLastHistory().clone();
+//                methodTime.setTime(commitTime);
+//                methodTime.setRefactorType(Extract_Class);
+//                methodTime.setParentCodeBlock(classBlock);
+//                methodBlock.addHistory(methodTime);
+//                commitTime.addCodeChange(methodTime);
+////               remove from old class, add to new class
+////                assert oldClassTime.getMethods().contains(methodBlock);
+//                oldClassTime.getMethods().remove(methodBlock);
+//                classTime.getMethods().add(methodBlock);
+//            }
             //attribute processing
             //todo 为了只处理类级别 将此处注释掉
-            List<SideLocation> extractedAttri = r.rightFilter("extracted attribute declaration");
-            for (SideLocation s : extractedAttri) {
-                String attriName = s.parseAttributeOrParameter();
-                assert mappings.containsKey(originSigOld + ":" + attriName);
-                CodeBlock attriBlock = mappings.get(originSigOld + ":" + attriName);
-                mappings.put(newSig + ":" + attriName, attriBlock);
-
-                AttributeTime attriTime = (AttributeTime) attriBlock.getLastHistory().clone();
-                attriTime.setTime(commitTime);
-                attriTime.setRefactorType(Extract_Class);
-                attriTime.setParentCodeBlock(classBlock);
-                attriBlock.addHistory(attriTime);
-                commitTime.addCodeChange(attriTime);
-//               remove from old class, add to new class
-//                assert oldClassTime.getAttributes().contains(attriBlock);
-                oldClassTime.getAttributes().remove(attriBlock);
-                classTime.getAttributes().add(attriBlock);
-            }
-            System.out.println(r.getType());
+//            List<SideLocation> extractedAttri = r.rightFilter("extracted attribute declaration");
+//            for (SideLocation s : extractedAttri) {
+//                String attriName = s.parseAttributeOrParameter();
+//                assert mappings.containsKey(originSigOld + ":" + attriName);
+//                CodeBlock attriBlock = mappings.get(originSigOld + ":" + attriName);
+//                mappings.put(newSig + ":" + attriName, attriBlock);
+//
+//                AttributeTime attriTime = (AttributeTime) attriBlock.getLastHistory().clone();
+//                attriTime.setTime(commitTime);
+//                attriTime.setRefactorType(Extract_Class);
+//                attriTime.setParentCodeBlock(classBlock);
+//                attriBlock.addHistory(attriTime);
+//                commitTime.addCodeChange(attriTime);
+////               remove from old class, add to new class
+////                assert oldClassTime.getAttributes().contains(attriBlock);
+//                oldClassTime.getAttributes().remove(attriBlock);
+//                classTime.getAttributes().add(attriBlock);
+//            }
+//            System.out.println(r.getType());
         }
     },
     Extract_Subclass {

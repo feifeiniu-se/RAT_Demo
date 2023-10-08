@@ -52,9 +52,9 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 public class ASTReader {
-    private static final String FREE_MARKER_GENERATED = "generated using freemarker";
-    private static final String FREE_MARKER_GENERATED_2 = "generated using FreeMarker";
-    private UMLModel umlModel;
+    protected static final String FREE_MARKER_GENERATED = "generated using freemarker";
+    protected static final String FREE_MARKER_GENERATED_2 = "generated using FreeMarker";
+    protected UMLModel umlModel;
 
     public ASTReader(Map<String, String> javaFileContents, Set<String> repositoryDirectories) {
         umlModel = new UMLModel(repositoryDirectories);
@@ -85,7 +85,7 @@ public class ASTReader {
         return methodBodyBlock;
     }
 
-    private void processJavaFileContents(Map<String, String> javaFileContents) {
+    protected void processJavaFileContents(Map<String, String> javaFileContents) {
         ASTParser parser = ASTParser.newParser(19);
         Iterator var4 = javaFileContents.keySet().iterator();
 
@@ -165,7 +165,7 @@ public class ASTReader {
 
     }
 
-    private List<UMLComment> extractInternalComments(CompilationUnit cu, String sourceFile, String javaFileContent) {
+    protected List<UMLComment> extractInternalComments(CompilationUnit cu, String sourceFile, String javaFileContent) {
         List<Comment> astComments = cu.getCommentList();
         List<UMLComment> comments = new ArrayList();
         Iterator var6 = astComments.iterator();
@@ -191,7 +191,7 @@ public class ASTReader {
         return comments;
     }
 
-    private void distributeComments(List<UMLComment> compilationUnitComments, LocationInfo codeElementLocationInfo, List<UMLComment> codeElementComments) {
+    protected void distributeComments(List<UMLComment> compilationUnitComments, LocationInfo codeElementLocationInfo, List<UMLComment> codeElementComments) {
         ListIterator listIterator = compilationUnitComments.listIterator(compilationUnitComments.size());
 
         while(true) {
@@ -211,12 +211,12 @@ public class ASTReader {
         }
     }
 
-    private UMLJavadoc generateJavadoc(CompilationUnit cu, BodyDeclaration bodyDeclaration, String sourceFile) {
+    protected UMLJavadoc generateJavadoc(CompilationUnit cu, BodyDeclaration bodyDeclaration, String sourceFile) {
         Javadoc javaDoc = bodyDeclaration.getJavadoc();
         return generateJavadoc(cu, sourceFile, javaDoc);
     }
 
-    private UMLJavadoc generateJavadoc(CompilationUnit cu, String sourceFile, Javadoc javaDoc) {
+    protected UMLJavadoc generateJavadoc(CompilationUnit cu, String sourceFile, Javadoc javaDoc) {
         UMLJavadoc doc = null;
         if (javaDoc != null) {
             LocationInfo locationInfo = generateLocationInfo(cu, sourceFile, javaDoc, CodeElementType.JAVADOC);
@@ -981,7 +981,7 @@ public class ASTReader {
         }
     }
 
-    private void insertNode(AnonymousClassDeclaration childAnonymous, DefaultMutableTreeNode root) {
+    protected void insertNode(AnonymousClassDeclaration childAnonymous, DefaultMutableTreeNode root) {
         Enumeration enumeration = root.postorderEnumeration();
         DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(childAnonymous);
         DefaultMutableTreeNode parentNode = root;
@@ -998,7 +998,7 @@ public class ASTReader {
         parentNode.add(childNode);
     }
 
-    private String getMethodNamePath(TypeDeclarationStatement statement) {
+    protected String getMethodNamePath(TypeDeclarationStatement statement) {
         String name = "";
 
         for(ASTNode parent = statement.getParent(); parent != null; parent = parent.getParent()) {
@@ -1015,7 +1015,7 @@ public class ASTReader {
         return name;
     }
 
-    private String getAnonymousCodePath(DefaultMutableTreeNode node) {
+    protected String getAnonymousCodePath(DefaultMutableTreeNode node) {
         AnonymousClassDeclaration anonymous = (AnonymousClassDeclaration)node.getUserObject();
         String name = "";
 
@@ -1062,7 +1062,7 @@ public class ASTReader {
         return name.toString();
     }
 
-    private String getAnonymousBinaryName(DefaultMutableTreeNode node) {
+    protected String getAnonymousBinaryName(DefaultMutableTreeNode node) {
         StringBuilder name = new StringBuilder();
         TreeNode[] path = node.getPath();
 
@@ -1081,7 +1081,7 @@ public class ASTReader {
         return name.toString();
     }
 
-    private boolean isParent(ASTNode child, ASTNode parent) {
+    protected boolean isParent(ASTNode child, ASTNode parent) {
         for(ASTNode current = child; current.getParent() != null; current = current.getParent()) {
             if (current.getParent().equals(parent)) {
                 return true;
@@ -1091,7 +1091,7 @@ public class ASTReader {
         return false;
     }
 
-    private LocationInfo generateLocationInfo(CompilationUnit cu, String sourceFile, ASTNode node, CodeElementType codeElementType) {
+    protected LocationInfo generateLocationInfo(CompilationUnit cu, String sourceFile, ASTNode node, CodeElementType codeElementType) {
         return new LocationInfo(cu, sourceFile, node, codeElementType);
     }
 }

@@ -58,6 +58,7 @@ public class Constructor {
             Set<String> repositoryDirectories = populateDirectories(fileContents);
 
             //packageLevel: firstly refactorings, then javaParser visitor
+            System.out.println("--------Package Level--------");
             if (refact != null && commitTime.getPreCommit() != null) {
                 if (!refact.getRefactorings().isEmpty()) {
                     List<Refactoring> packageLevelRefactorings = refact.filter("package");
@@ -80,6 +81,7 @@ public class Constructor {
             packageVisitor.packageVisitor(fileContents, repositoryDirectories, codeBlocks, codeChange, mappings);
             updateMappings(mappings, codeBlocks);
 
+            System.out.println("--------Class Level--------");
             //classLevel; firstly refactorings, then javaparser visitor
             if (refact != null && commitTime.getPreCommit() != null) {
                 if (!refact.getRefactorings().isEmpty()) {
@@ -104,6 +106,7 @@ public class Constructor {
             classVisitor.classVisitor(fileContents, repositoryDirectories, codeBlocks, codeChange, mappings);
 //            updateMappings(mappings, codeBlocks);
 //            //method and attribute level: firstly refactoring, then javaparser visitor
+            System.out.println("--------Method Level--------");
             if (refact != null && commitTime.getPreCommit() != null) {
                 if (!refact.getRefactorings().isEmpty()) {
                     //method & attribute
@@ -131,7 +134,8 @@ public class Constructor {
 //                }
 //            }
             MethodAndAttributeVisitor methodAndAttributeVisitor = new MethodAndAttributeVisitor();
-            methodAndAttributeVisitor.methodAAttributeVisitor(fileContents, repositoryDirectories, codeBlocks, codeChange, mappings);
+            methodAndAttributeVisitor.methodAAttributeVisitor(fileContents, repositoryDirectories, codeBlocks, codeChange, mappings, classVisitor);
+            classVisitor.processResidualClass();
             updateMappings(mappings, codeBlocks);
         }
     }

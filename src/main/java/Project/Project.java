@@ -47,6 +47,10 @@ public class Project {
 
 
     public Project(String[] info) {
+        //命令行待添加
+//        projectAddress = info[0];
+//        name = projectAddress.substring(projectAddress.lastIndexOf("\\")+1);
+
         name = info[0];
         startHash = info[1];
         endHash = info[2];
@@ -148,8 +152,8 @@ public class Project {
     //return the refactorings
     public HashMap<String, Refactorings> readRefactoring() {
         //根据startHash和endHash生成Json
-        GenerateJsonFiles generateJsonFiles = new GenerateJsonFiles();
-        generateJsonFiles.generateJson(projectAddress, refactoringMinerAddress, startHash, endHash);
+//        GenerateJsonFiles generateJsonFiles = new GenerateJsonFiles();
+//        generateJsonFiles.generateJson(projectAddress, refactoringMinerAddress, startHash, endHash);
 
         //done
         String fileContent = readFile(refactoringMinerAddress);

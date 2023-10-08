@@ -1,9 +1,11 @@
 package Model;
 
+import Constructor.Enums.OpeTypeEnum;
 import Constructor.Enums.Operator;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -18,6 +20,13 @@ public abstract class CodeBlockTime implements Cloneable, Serializable {
     Set<CodeBlockTime> derivee = new HashSet<>();  // 子
     CodeBlock parentCodeBlock;
     CodeBlock owner;
+
+    int oldStartLineNum;
+    int oldEndLineNum;
+    int newStartLineNum;
+    int newEndLineNum;
+    HashMap<Integer, OpeTypeEnum> newChangeLines;
+    HashMap<Integer, OpeTypeEnum> oldChangeLines;
 
     public abstract String getSignature();
     public abstract Set<CodeBlock> getPackages();

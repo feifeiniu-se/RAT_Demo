@@ -6,7 +6,17 @@ import Persistence.CommitCodeChangeSaver;
 import Persistence.MappingSaver;
 import Project.Project;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 
@@ -14,6 +24,46 @@ import java.util.List;
 public class start {
 
     public static void main(String[] args){
+        if (args.length < 1) {
+            throw argumentException();
+        }
+
+        final String option = args[0];
+        if (option.equalsIgnoreCase("-h") || option.equalsIgnoreCase("--h") || option.equalsIgnoreCase("-help")
+                || option.equalsIgnoreCase("--help")) {
+            printTips();
+            return;
+        }
+
+        String localPath = args[1];
+        String startCommitHash = null;
+        String endCommitHash = null;
+
+        try (Repository repository = Git.open(new File(localPath)).getRepository()) {
+
+            if (option.equalsIgnoreCase("-a")) {
+                // 获取起始commit的hash值
+                startCommitHash = getStartCommitId(repository);
+
+                // 获取最终commit的hash值
+                endCommitHash = getEndCommitId(repository);
+
+            } else if (option.equalsIgnoreCase("-bc")) {
+                startCommitHash = args[2];
+                endCommitHash = args[3];
+            } else if (option.equalsIgnoreCase("-c")) {
+                endCommitHash = args[2];
+                startCommitHash = getPreCommitId(repository, endCommitHash);
+            } else {
+                throw argumentException();
+            }
+
+        } catch (GitAPIException | IOException exception){
+            exception.printStackTrace();
+        }
+
+//        String info[] = new String[]{localPath, startCommitHash, endCommitHash};
+
 
         String info[] = new String[]{
 
@@ -92,5 +142,55 @@ public class start {
         System.out.println(codeBlocks.size());
         System.out.println(commits.size());
         System.out.println(mappings.size());
+    }
+
+    private static String getStartCommitId(Repository repository) throws IOException, GitAPIException {
+        try (Git git = new Git(repository)) {
+            Iterable<RevCommit> commits = git.log().call();
+            RevCommit endCommit = null;
+            for (RevCommit commit : commits) {
+                endCommit = commit;
+            }
+            return endCommit.getId().getName();
+        }
+    }
+
+    private static String getEndCommitId(Repository repository) throws IOException, GitAPIException {
+        try (Git git = new Git(repository)) {
+            Iterable<RevCommit> commits = git.log().call();
+            RevCommit startCommit = commits.iterator().next();
+            return startCommit.getId().getName();
+        }
+    }
+
+    private static String getPreCommitId(Repository repository, String endHash) throws IOException, GitAPIException {
+        try (Git git = new Git(repository)) {
+            Iterable<RevCommit> commits = git.log().call();
+            RevCommit preCommit = null;
+            for (RevCommit commit : commits) {
+                if(preCommit != null && preCommit.getId().getName().equals(endHash)){
+                    preCommit = commit;
+                    break;
+                }else {
+                    preCommit = commit;
+                }
+            }
+            return preCommit.getId().getName();
+        }
+    }
+
+    private static void printTips() {
+        System.out.println("-h\t\t\t\t\t\t\t\t\t\t\tShow options");
+        System.out.println(
+                "-a <git-repo-folder>\t\t\t\t\tDetect all refactorings for <git-repo-folder>");
+        System.out.println(
+                "-bc <git-repo-folder> <start-commit-sha1> <end-commit-sha1>\tDetect refactorings between <start-commit-sha1> and <end-commit-sha1> for project <git-repo-folder>");
+        System.out.println(
+                "-c <git-repo-folder> <commit-sha1>\t\t\t\tDetect refactorings between the previous one of <commit-sha1> and <commit-sha1> for project <git-repo-folder>");
+
+        }
+
+    private static IllegalArgumentException argumentException() {
+        return new IllegalArgumentException("Type `Traceability -h` to show usage.");
     }
 }
