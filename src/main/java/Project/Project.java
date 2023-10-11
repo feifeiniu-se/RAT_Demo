@@ -6,10 +6,7 @@ import java.util.*;
 import Constructor.Enums.FileType;
 import Project.RefactoringMiner.Commits;
 import Project.RefactoringMiner.Refactorings;
-import Project.Utils.CommitHashCode;
-import Project.Utils.DiffFile;
-import Project.Utils.GenerateJsonFiles;
-import Project.Utils.LocalFileDiff;
+import Project.Utils.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import lombok.Data;
@@ -231,24 +228,14 @@ public class Project {
 
     }
 
-    //return the list of <oldFile, newFile>, which stands for the parent file and current file
-    public List<LocalFileDiff> getLocalDiffFileList(CommitHashCode commitHash) {
-        List<LocalFileDiff> res = new ArrayList<>();
+    public HashMap<String, LocalDiffFile> getLocalDiffMap(CommitHashCode commitHash){
+        HashMap<String, LocalDiffFile> res = new HashMap<>();
 
         String parent = commitHash.getParent();
         String hashCode = commitHash.getHashCode();
 
         if (parent == null) {
-            //this is the first commit
-            Map<String, String> sourceCode = getSourceCode(hashCode);//all the java code and it's name during this commit
-            // set all the files as add
-            if (sourceCode.size() < 1) {
-                return null;
-            }// no new java file
-            for (Map.Entry<String, String> entry : sourceCode.entrySet()) {
-                LocalFileDiff f= new LocalFileDiff(entry.getKey(), entry.getValue(), hashCode);
-                res.add(f);
-            }
+            return res;
         } else {
             Map<String, String> oldCode = getSourceCode(parent);
             Map<String, String> newCode = getSourceCode(hashCode);
@@ -265,7 +252,8 @@ public class Project {
         return res;
     }
 
-    public List<LocalFileDiff> getDiffBetweenCommits(Repository repository, Git git, String oldCommit, String newCommit, Map<String, String> oldCode, Map<String, String> newCode) throws IOException, GitAPIException {
+
+    public HashMap<String, LocalDiffFile> getDiffBetweenCommits(Repository repository, Git git, String oldCommit, String newCommit, Map<String, String> oldCode, Map<String, String> newCode) throws IOException, GitAPIException {
 
         AbstractTreeIterator oldTree = prepareTreeParser(repository, oldCommit);
         AbstractTreeIterator newTree = prepareTreeParser(repository, newCommit);
@@ -286,7 +274,7 @@ public class Project {
             diff = rd.compute();
         } // so far, file status includes: add, delete, rename, copy
 
-        List<LocalFileDiff> res=new ArrayList<>();
+        HashMap<String, LocalDiffFile> res=new HashMap<>();
         for (DiffEntry entry : diff) {
             DiffFormatter formatter = new DiffFormatter(byteStream) ;
             formatter.setRepository(repository);
@@ -294,14 +282,13 @@ public class Project {
 
             String mid=byteStream.toString();
             byteStream.reset();
-            LocalFileDiff f= new LocalFileDiff(entry);
+            LocalDiffFile f= new LocalDiffFile(entry);
             f.setPatch(mid);
             f.setSha(newCommit);
             f.setOldContent(oldCode.get(f.getOldFilePath()));
             f.setContent(newCode.get(f.getFilePath()));
             f.patchParser(); //obtain
-            f.fileParser();
-            res.add(f);
+            res.put(f.getFilePath(), f);
         }
         return res;
     }

@@ -2149,7 +2149,7 @@ public enum Operator {
             assert classBlockOld.equals(attriBlock.getLastHistory().getParentCodeBlock());
 
             // create new attributeTime, update parentBlock; create two classTime for oldClassBlock and newClassBlock, move from oldTime to newTime
-            AttributeTime attriTime = (AttributeTime) attriBlock.getLastHistory().clone();
+            AttributeTime attriTime = (AttributeTime) attriBlock.getLastHistory();
             attriTime.setName(newAttri);
             attriTime.setTime(commitTime);
             attriTime.setRefactorType(Operator.Move_Attribute);

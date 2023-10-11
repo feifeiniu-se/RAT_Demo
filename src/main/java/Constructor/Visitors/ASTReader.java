@@ -432,6 +432,7 @@ public class ASTReader {
 
         while(var13.hasNext()) {
             TypeDeclarationStatement statement = (TypeDeclarationStatement)var13.next();
+            //todo:methodName处理
             String methodNamePath = getMethodNamePath(statement);
             String fullName = packageName + "." + className + "." + methodNamePath;
             AbstractTypeDeclaration localTypeDeclaration = statement.getDeclaration();

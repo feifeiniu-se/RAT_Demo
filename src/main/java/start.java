@@ -98,9 +98,9 @@ public class start {
 
 //              JITFine projects
 //                "ant-ivy 0586b1a535a2bcb0f2524c857f06befef53f845e 5e5049921c71abccdd04cc4b6d97af8c57f3e631"
-                "archiva 4579f684aa761897191c06736b7fd4f12b2e1369 25d7ddeaaf5bea7d87e4f3652e868d6bc9b1a018"
+//                "archiva 4579f684aa761897191c06736b7fd4f12b2e1369 25d7ddeaaf5bea7d87e4f3652e868d6bc9b1a018"
 //                "ant-ivy 2f1b256059c3e09d361d61f3a6ff9e7038db6451 5e5049921c71abccdd04cc4b6d97af8c57f3e631"
-//                "ant-ivy 92350a7a2546d9e9894d9b20767aa5691bd48236 5e5049921c71abccdd04cc4b6d97af8c57f3e631"
+                "ant-ivy 92350a7a2546d9e9894d9b20767aa5691bd48236 5e5049921c71abccdd04cc4b6d97af8c57f3e631"
 
 //                "maven d0de5773b3f97a69319d15d775c118b048b5c0ec 1bd449b2f1e5ba122ef4d4466cf308adb24764c4"
         };

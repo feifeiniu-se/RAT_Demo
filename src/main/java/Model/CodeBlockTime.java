@@ -25,6 +25,8 @@ public abstract class CodeBlockTime implements Cloneable, Serializable {
     int oldEndLineNum;
     int newStartLineNum;
     int newEndLineNum;
+    int oldDeclarationLineNum;
+    int newDeclarationLineNum;
     HashMap<Integer, OpeTypeEnum> newChangeLines;
     HashMap<Integer, OpeTypeEnum> oldChangeLines;
 
@@ -35,6 +37,18 @@ public abstract class CodeBlockTime implements Cloneable, Serializable {
     public abstract Set<CodeBlock> getAttributes();
     abstract Set<CodeBlock> getParameterRetureType();
     abstract String getParameters();
+
+    CodeBlockTime(){
+        oldStartLineNum = -1;
+        oldEndLineNum = -1;
+        newStartLineNum = -1;
+        newEndLineNum = -1;
+        oldDeclarationLineNum = -1;
+        newDeclarationLineNum = -1;
+
+        newChangeLines = new HashMap<>();
+        oldChangeLines = new HashMap<>();
+    }
 
     @Override
     public Object clone() {
@@ -47,5 +61,17 @@ public abstract class CodeBlockTime implements Cloneable, Serializable {
             e.printStackTrace();
         }
         return codeBlockTime;
+    }
+
+    public void setNewLineNum(int newStartLineNum, int newEndLineNum, int newDeclarationLineNum){
+        this.newStartLineNum = newStartLineNum;
+        this.newEndLineNum = newEndLineNum;
+        this.newDeclarationLineNum = newDeclarationLineNum;
+    }
+
+    public void setOldLineNum(int oldStartLineNum, int oldEndLineNum, int oldDeclarationLineNum){
+        this.oldStartLineNum = oldStartLineNum;
+        this.oldEndLineNum = oldEndLineNum;
+        this.oldDeclarationLineNum = oldDeclarationLineNum;
     }
 }
