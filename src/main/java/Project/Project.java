@@ -47,16 +47,13 @@ public class Project {
 
 
     public Project(String[] info) {
-        //命令行待添加
-//        projectAddress = info[0];
-//        name = projectAddress.substring(projectAddress.lastIndexOf("\\")+1);
-
-        name = info[0];
+        projectAddress = info[0];
+        name = projectAddress.substring(projectAddress.lastIndexOf("\\")+1);
         startHash = info[1];
         endHash = info[2];
 //        startHash = "6555d3cebbc83c04e39eb2071f9f4912430e8c97";
 //        endHash = "9ed57d1e21e9bb3795e02aaed6bc40696fa51de5";//TODO for test f65d3a05dfec17d851aed9f1b262ee64710b99a7
-        projectAddress = "C:\\dataset\\jitfine\\" + name;
+//        projectAddress = "C:\\dataset\\jitfine\\" + name;
         refactoringMinerAddress = "C:\\dataset\\jitfine\\A-refactorings\\" + name + ".json";
         commitList = getList();
         refactorings = readRefactoring();
@@ -152,8 +149,8 @@ public class Project {
     //return the refactorings
     public HashMap<String, Refactorings> readRefactoring() {
         //根据startHash和endHash生成Json
-//        GenerateJsonFiles generateJsonFiles = new GenerateJsonFiles();
-//        generateJsonFiles.generateJson(projectAddress, refactoringMinerAddress, startHash, endHash);
+        GenerateJsonFiles generateJsonFiles = new GenerateJsonFiles();
+        generateJsonFiles.generateJson(projectAddress, refactoringMinerAddress, startHash, endHash);
 
         //done
         String fileContent = readFile(refactoringMinerAddress);

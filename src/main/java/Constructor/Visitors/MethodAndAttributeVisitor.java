@@ -156,15 +156,16 @@ public class MethodAndAttributeVisitor {
         String methodName = sb.toString();
         String signature_method = signature + ":" + methodName;
 
-        if(signature_method.contains("testDifferentVersionWarning")){
-            System.out.println(114514);
-            System.out.println(signature_method);
-        }
-
         //处理完毕，生成CodeBlock和CodeBlockTime
         if (!mappings.containsKey(signature_method)) {
             CodeBlock codeBlock = new CodeBlock(codeBlocks.size() + 1, CodeBlockType.Method);
             mappings.put(signature_method, codeBlock);
+
+            String anotherName = signature+"."+umlOperation.getName();
+            if(classVisitor.getResidualFatherList().contains(anotherName)){
+                mappings.put(anotherName, codeBlock);
+            }
+
             codeBlocks.add(codeBlock);
             CodeBlock classBlock = mappings.get(signature);
             if(classBlock == null){

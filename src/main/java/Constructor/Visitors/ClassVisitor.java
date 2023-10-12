@@ -9,28 +9,28 @@ import gr.uom.java.xmi.UMLComment;
 import gr.uom.java.xmi.UMLImport;
 import gr.uom.java.xmi.UMLJavadoc;
 import gr.uom.java.xmi.UMLModelASTReader;
+import lombok.Data;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jgit.api.SubmoduleUpdateCommand;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-
+@Data
 public class ClassVisitor {
     private List<CodeBlock> codeBlocks;
     private HashMap<String, CodeBlock> mappings;
     private CommitCodeChange commitCodeChange;
     private HashMap<String, String[]> residualClassMap;
+    private List<String> residualFatherList;
 
     public void classVisitor(Map<String, String> javaFileContents, Set<String> repositoryDirectories, List<CodeBlock> codeBlocks, List<CommitCodeChange> codeChange, HashMap<String, CodeBlock> mappings) {
         this.codeBlocks = codeBlocks;
         this.mappings = mappings;
         this.commitCodeChange = codeChange.get(codeChange.size() - 1); //获得当前commit的内容
         this.residualClassMap = new HashMap<>();
+        this.residualFatherList = new ArrayList<>();
 
         Reader reader= new Reader(javaFileContents, repositoryDirectories);
     }
@@ -61,9 +61,13 @@ public class ClassVisitor {
         protected void processTypeDeclaration(CompilationUnit cu, TypeDeclaration typeDeclaration, String packageName, String sourceFile, List<UMLImport> importedTypes, UMLJavadoc packageDoc, List<UMLComment> comments){
             String className = typeDeclaration.getName().getFullyQualifiedName();
             String signature = packageName.equals("") ? className : packageName + "." + className;
+            if(packageName.startsWith(".")){
+                packageName = packageName.substring(1);
+            }
             CodeBlock pkgBlock = mappings.get(packageName);
             if(pkgBlock == null){
                 residualClassMap.put(signature, new String[]{packageName, className});
+                residualFatherList.add(packageName);
             } else if (!mappings.containsKey(signature)) {
                 CodeBlock classBlock = new CodeBlock(codeBlocks.size() + 1, CodeBlockType.Class);
                 mappings.put(signature, classBlock);
@@ -82,14 +86,6 @@ public class ClassVisitor {
                 String className = entry.getValue()[1];
                 CodeBlock parentBlock = mappings.get(parentName);
 
-                if(parentBlock == null){
-                    System.out.println();
-                    System.out.println(parentName);
-                    System.out.println(className);
-                    System.out.println(signature);
-                    mappings.keySet().stream().filter(p -> p.contains("testDifferentVersionWarning"))
-                            .forEach(System.out::println);
-                }
                 CodeBlock classBlock = new CodeBlock(codeBlocks.size() + 1, CodeBlockType.Class);
                 mappings.put(signature, classBlock);
                 codeBlocks.add(classBlock);
@@ -110,4 +106,5 @@ public class ClassVisitor {
             ClassTime classTime = new ClassTime(className, commitCodeChange, Operator.Add_Class, classBlock, pkgBlock);//create classTime, add to classBlock, commitTime, update parentBlock
         }
     }
+
 }

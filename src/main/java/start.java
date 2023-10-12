@@ -62,11 +62,10 @@ public class start {
             exception.printStackTrace();
         }
 
-//        String info[] = new String[]{localPath, startCommitHash, endCommitHash};
+        String info[] = new String[]{localPath, startCommitHash, endCommitHash};
 
-
-        String info[] = new String[]{
-
+//      for test：
+//        String info[] = new String[]{
                 //RAT projects
 //                "axis-axis2-java-core 5e257a10f3d0cff2ff2572a00787d1582a706c87 82e251bd1af51b5106357772b13000cda151b97e",
 //                "derby f68f62fd81539c77a456631fbb47970ef33bc4fa 0199c2ecf5abe872f229831db89b425932421cd9", //done
@@ -98,16 +97,14 @@ public class start {
 
 //              JITFine projects
 //                "ant-ivy 0586b1a535a2bcb0f2524c857f06befef53f845e 5e5049921c71abccdd04cc4b6d97af8c57f3e631"
-                "archiva 4579f684aa761897191c06736b7fd4f12b2e1369 25d7ddeaaf5bea7d87e4f3652e868d6bc9b1a018"
+//                "archiva 4579f684aa761897191c06736b7fd4f12b2e1369 25d7ddeaaf5bea7d87e4f3652e868d6bc9b1a018"
 //                "ant-ivy 2f1b256059c3e09d361d61f3a6ff9e7038db6451 5e5049921c71abccdd04cc4b6d97af8c57f3e631"
 //                "ant-ivy 92350a7a2546d9e9894d9b20767aa5691bd48236 5e5049921c71abccdd04cc4b6d97af8c57f3e631"
 
 //                "maven d0de5773b3f97a69319d15d775c118b048b5c0ec 1bd449b2f1e5ba122ef4d4466cf308adb24764c4"
-        };
+//        };
 
-        int i = 0;
-        System.out.println(info[i]);
-        Project p = new Project(info[i].split(" "));
+        Project p = new Project(info);
 //        String database = "C:\\Users\\Feifei\\dataset\\tracescore\\seam2.sqlite3";
         Constructor constructor = new Constructor(p);
         constructor.start();// start code analysis
@@ -180,13 +177,13 @@ public class start {
     }
 
     private static void printTips() {
-        System.out.println("-h\t\t\t\t\t\t\t\t\t\t\tShow options");
+        System.out.println("-h\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tShow options");
         System.out.println(
-                "-a <git-repo-folder>\t\t\t\t\tDetect all refactorings for <git-repo-folder>");
+                "-a <git-repo-folder>\t\t\t\t\t\t\t\t\t\tDetect all refactorings for <git-repo-folder>");
         System.out.println(
                 "-bc <git-repo-folder> <start-commit-sha1> <end-commit-sha1>\tDetect refactorings between <start-commit-sha1> and <end-commit-sha1> for project <git-repo-folder>");
         System.out.println(
-                "-c <git-repo-folder> <commit-sha1>\t\t\t\tDetect refactorings between the previous one of <commit-sha1> and <commit-sha1> for project <git-repo-folder>");
+                "-c <git-repo-folder> <commit-sha1>\t\t\t\t\t\t\tDetect refactorings between the previous one of <commit-sha1> and <commit-sha1> for project <git-repo-folder>");
 
         }
 
