@@ -62,7 +62,7 @@ public class CodeBlockSaver {
 
     private void saveCodeBlockTime(List<CodeBlockTime> codeBlockTimes) {
         try {
-            PreparedStatement preparedStatement = helper.getPreparedStatement("insert into CodeBlockTime (name,commitId,refactorType,parentCodeBlock,owner,parameters) values(?,?,?,?,?,?);");
+            PreparedStatement preparedStatement = helper.getPreparedStatement("insert into CodeBlockTime (name,commitId,refactorType,parentCodeBlock,owner,parameters,oldStartLineNum,oldEndLineNum,newStartLineNum,newEndLineNum) values(?,?,?,?,?,?,?,?,?,?);");
             for (CodeBlockTime codeBlockTime : codeBlockTimes) {
                 preparedStatement.setString(1, codeBlockTime.getName());
                 preparedStatement.setString(2, codeBlockTime.getTime().getCommitID());
@@ -81,6 +81,10 @@ public class CodeBlockSaver {
                 if (codeBlockTime instanceof MethodTime) {
                     preparedStatement.setString(6, ((MethodTime) codeBlockTime).getParameters());
                 }
+                preparedStatement.setInt(7, codeBlockTime.getOldStartLineNum());
+                preparedStatement.setInt(8, codeBlockTime.getOldEndLineNum());
+                preparedStatement.setInt(9, codeBlockTime.getNewStartLineNum());
+                preparedStatement.setInt(10, codeBlockTime.getNewEndLineNum());
                 preparedStatement.executeUpdate();  // 立即执行
                 int id = helper.executeQuery("select last_insert_rowid() as id from CodeBlockTime limit 1;", resultSet -> {
                     int id1 = -1;
@@ -103,6 +107,9 @@ public class CodeBlockSaver {
         try {
             PreparedStatement preparedStatement = helper.getPreparedStatement("insert into CodeBlockTimeChild (codeBlockTimeId,codeBlockChildId,codeBlockChildType) values(?,?,?);");  // ( 父亲, 孩子, link类型 )
             for (CodeBlockTime codeBlockTime : codeBlockTimes) {
+                if(codeBlockTime2Id.get(codeBlockTime) == null){
+                    System.out.println(114514);
+                }
                 preparedStatement.setInt(1, codeBlockTime2Id.get(codeBlockTime));
                 if (codeBlockTime instanceof AttributeTime) {
                     constructPreparedStatementForAttributeTime(preparedStatement, (AttributeTime) codeBlockTime);

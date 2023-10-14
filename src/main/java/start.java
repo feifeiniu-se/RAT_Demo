@@ -3,20 +3,17 @@ import Model.CodeBlock;
 import Model.CommitCodeChange;
 import Persistence.CodeBlockSaver;
 import Persistence.CommitCodeChangeSaver;
+import Persistence.CommitMessageSaver;
 import Persistence.MappingSaver;
 import Project.Project;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevWalk;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 
@@ -38,6 +35,7 @@ public class start {
         String localPath = args[1];
         String startCommitHash = null;
         String endCommitHash = null;
+        String database = "D:\\tool\\database\\seam2.sqlite3";
 
         try (Repository repository = Git.open(new File(localPath)).getRepository()) {
 
@@ -47,17 +45,22 @@ public class start {
 
                 // 获取最终commit的hash值
                 endCommitHash = getEndCommitId(repository);
+                database = args[3];
 
             } else if (option.equalsIgnoreCase("-bc")) {
                 startCommitHash = args[2];
                 endCommitHash = args[3];
+                database = args[5];
             } else if (option.equalsIgnoreCase("-c")) {
                 endCommitHash = args[2];
+                database = args[4];
                 startCommitHash = getPreCommitId(repository, endCommitHash);
             } else {
                 throw argumentException();
             }
 
+            CommitMessageSaver commitMessageSaver = new CommitMessageSaver(database);
+            commitMessageSaver.save(endCommitHash, startCommitHash,  repository);
         } catch (GitAPIException | IOException exception){
             exception.printStackTrace();
         }
@@ -105,30 +108,30 @@ public class start {
 //        };
 
         Project p = new Project(info);
-        String database = "D:\\tool\\database\\seam2.sqlite3";
         Constructor constructor = new Constructor(p);
         constructor.start();// start code analysis
         List<CodeBlock> codeBlocks = constructor.getCodeBlocks();  //
         List<CommitCodeChange> commits = constructor.getCodeChange();  // commitId对应hash值，代表在当前commit hash中，纵向
         HashMap<String, CodeBlock> mappings = constructor.getMappings();
-//        // codeBlockId、commitId可以唯一确定一个codeblocktime，但也有可能是没有东西的
-////        save(codeBlocks, commits);
-//
-////        log.info("Constructor finished.");
-////        log.info("Start to save CommitCodeChange");
-//        CommitCodeChangeSaver commitCodeChangeSaver = new CommitCodeChangeSaver(database);
-//        commitCodeChangeSaver.save(commits);
-//        commitCodeChangeSaver.close();
-//
-//        MappingSaver mappingSaver = new MappingSaver(database);
-//        mappingSaver.save(mappings);
-//        mappingSaver.close();
-//
-////        log.info("Start to save CodeBlock");
-//        CodeBlockSaver codeBlockSaver = new CodeBlockSaver(database);
-//        codeBlockSaver.save(codeBlocks);
-//        codeBlockSaver.close();
-////        log.info("CodeBlockSaver finished.");
+        // codeBlockId、commitId可以唯一确定一个codeblocktime，但也有可能是没有东西的
+//        save(codeBlocks, commits);
+
+//        log.info("Constructor finished.");
+//        log.info("Start to save CommitCodeChange");
+
+        CommitCodeChangeSaver commitCodeChangeSaver = new CommitCodeChangeSaver(database);
+        commitCodeChangeSaver.save(commits);
+        commitCodeChangeSaver.close();
+
+        MappingSaver mappingSaver = new MappingSaver(database);
+        mappingSaver.save(mappings);
+        mappingSaver.close();
+
+//        log.info("Start to save CodeBlock");
+        CodeBlockSaver codeBlockSaver = new CodeBlockSaver(database);
+        codeBlockSaver.save(codeBlocks);
+        codeBlockSaver.close();
+//        log.info("CodeBlockSaver finished.");
 
         int x = 0;
         for(CodeBlock cb: codeBlocks){
@@ -179,11 +182,11 @@ public class start {
     private static void printTips() {
         System.out.println("-h\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tShow options");
         System.out.println(
-                "-a <git-repo-folder>\t\t\t\t\t\t\t\t\t\tDetect all refactorings for <git-repo-folder>");
+                "-a <git-repo-folder> -s <sqlite-file-path>\t\t\t\t\t\t\t\t\t\tDetect all refactorings for <git-repo-folder>");
         System.out.println(
-                "-bc <git-repo-folder> <start-commit-sha1> <end-commit-sha1>\tDetect refactorings between <start-commit-sha1> and <end-commit-sha1> for project <git-repo-folder>");
+                "-bc <git-repo-folder> <start-commit-sha1> <end-commit-sha1> -s <sqlite-file-path>\tDetect refactorings between <start-commit-sha1> and <end-commit-sha1> for project <git-repo-folder>");
         System.out.println(
-                "-c <git-repo-folder> <commit-sha1>\t\t\t\t\t\t\tDetect refactorings between the previous one of <commit-sha1> and <commit-sha1> for project <git-repo-folder>");
+                "-c <git-repo-folder> <commit-sha1> -s <sqlite-file-path>\t\t\t\t\t\t\tDetect refactorings between the previous one of <commit-sha1> and <commit-sha1> for project <git-repo-folder>");
 
         }
 

@@ -119,10 +119,6 @@ public class Visitor {
             String className = typeDeclaration.getName().getFullyQualifiedName();
             String signature = packageName.equals("") ? className : packageName + "." + className;
 
-            if(signature.contains("Main")){
-                System.out.println(114514);
-            }
-
             CodeBlock pkgBlock = mappings.get(packageName);
             String anotherName = packageName;
             if(anotherName.startsWith(".")){

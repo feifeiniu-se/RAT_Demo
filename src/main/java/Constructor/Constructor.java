@@ -62,8 +62,8 @@ public class Constructor {
 
 
             //packageLevel: firstly refactorings, then javaParser visitor
-            System.out.println("--------Package Level--------");
             if (refact != null && commitTime.getPreCommit() != null) {
+                System.out.println("--------Package Level--------");
                 if (!refact.getRefactorings().isEmpty()) {
                     List<Refactoring> packageLevelRefactorings = refact.filter("package");
                     if (!packageLevelRefactorings.isEmpty()) {
@@ -78,9 +78,9 @@ public class Constructor {
 //            packageVisitor.packageVisitor(fileContents, repositoryDirectories, codeBlocks, codeChange, mappings);
             updateMappings(mappings, codeBlocks);
 
-            System.out.println("--------Class Level--------");
             //classLevel; firstly refactorings, then javaparser visitor
             if (refact != null && commitTime.getPreCommit() != null) {
+                System.out.println("--------Class Level--------");
                 if (!refact.getRefactorings().isEmpty()) {
                     // class level
                     List<Refactoring> classLevelRefactorings = refact.filter("class");
@@ -96,8 +96,8 @@ public class Constructor {
 //            classVisitor.classVisitor(fileContents, repositoryDirectories, codeBlocks, codeChange, mappings);
             updateMappings(mappings, codeBlocks);
 //            //method and attribute level: firstly refactoring, then javaparser visitor
-            System.out.println("--------Method Level--------");
             if (refact != null && commitTime.getPreCommit() != null) {
+                System.out.println("--------Method Level--------");
                 if (!refact.getRefactorings().isEmpty()) {
                     //method & attribute
                     List<Refactoring> methodAndAttributeLevelRefactorings = refact.filter("methodAndAttribute");
