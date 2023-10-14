@@ -23,12 +23,6 @@ public class MethodTime extends CodeBlockTime{
         parameters = params;
         cmt.addCodeChange(this);
         own.addHistory(this);
-        ClassTime parentTime = (ClassTime) parent.getLastHistory().clone();
-        parentTime.setTime(cmt);
-        parentTime.setRefactorType(tp);
-        parentTime.getMethods().add(own);
-        parent.addHistory(parentTime);
-        cmt.addCodeChange(parentTime);
     }
 
 

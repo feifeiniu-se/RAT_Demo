@@ -1,5 +1,6 @@
 package Project;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -17,6 +18,7 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.diff.RenameDetector;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
@@ -148,9 +150,9 @@ public class Project {
 
     //return the refactorings
     public HashMap<String, Refactorings> readRefactoring() {
-        //根据startHash和endHash生成Json
-        GenerateJsonFiles generateJsonFiles = new GenerateJsonFiles();
-        generateJsonFiles.generateJson(projectAddress, refactoringMinerAddress, startHash, endHash);
+//        //根据startHash和endHash生成Json
+//        GenerateJsonFiles generateJsonFiles = new GenerateJsonFiles();
+//        generateJsonFiles.generateJson(projectAddress, refactoringMinerAddress, startHash, endHash);
 
         //done
         String fileContent = readFile(refactoringMinerAddress);
@@ -214,19 +216,30 @@ public class Project {
 
 
 //                System.out.println("Found: " + diffs.size() + " differences");
+                ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
                 for (DiffEntry diff : diffs) {
                     //newCode.containsKey()
+                    DiffFile f = null;
                     if (diff.getChangeType().name().equals("DELETE")) {
-                        res.put(diff.getOldPath(), new DiffFile(FileType.valueOf(diff.getChangeType().name()), diff.getNewPath(), newCode.get(diff.getNewPath()), diff.getOldPath(), oldCode.get(diff.getOldPath())));
+                        f = new DiffFile(FileType.valueOf(diff.getChangeType().name()), diff.getNewPath(), newCode.get(diff.getNewPath()), diff.getOldPath(), oldCode.get(diff.getOldPath()));
+                        res.put(diff.getOldPath(), f);
                     } else {
                         if(newCode.get(diff.getNewPath())!=null){
-                            res.put(diff.getNewPath(), new DiffFile(FileType.valueOf(diff.getChangeType().name()), diff.getNewPath(), newCode.get(diff.getNewPath()), diff.getOldPath(), oldCode.get(diff.getOldPath())));
+                            f = new DiffFile(FileType.valueOf(diff.getChangeType().name()), diff.getNewPath(), newCode.get(diff.getNewPath()), diff.getOldPath(), oldCode.get(diff.getOldPath()));
+                            res.put(diff.getNewPath(), f);
                         }
 
                     }
-//                    System.out.println("Diff: " + diff.getChangeType() + ": " +
-//                            (diff.getOldPath().equals(diff.getNewPath()) ? diff.getNewPath() : diff.getOldPath() + " -> " + diff.getNewPath()));
-//            System.out.println(diff);
+                    if(f != null){
+                        DiffFormatter formatter = new DiffFormatter(byteStream) ;
+                        formatter.setRepository(repository);
+                        formatter.format(diff);
+
+                        String mid=byteStream.toString();
+                        byteStream.reset();
+                        f.setPatch(mid);
+                        f.patchParser();
+                    }
                 }
 
             } catch (IOException e) {

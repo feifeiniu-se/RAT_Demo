@@ -8591,3 +8591,5 @@
 2023-08-23 17:14:50,561 ERROR Project.Utils.GenerateJsonFiles$1.handleException(GenerateJsonFiles.java:61) - class gr.uom.java.xmi.decomposition.StatementObject cannot be cast to class gr.uom.java.xmi.decomposition.CompositeStatementObject (gr.uom.java.xmi.decomposition.StatementObject and gr.uom.java.xmi.decomposition.CompositeStatementObject are in unnamed module of loader 'app')
 2023-10-12 14:39:41,991 ERROR Project.Utils.ReadJsonFiles.readFile(ReadJsonFiles.java:29) - Invalid file path
 2023-10-12 15:10:24,945 ERROR Project.Utils.ReadJsonFiles.readFile(ReadJsonFiles.java:29) - C:\dataset\jitfine\A-refactorings\try.json (系统找不到指定的文件。)
+2023-10-12 21:43:24,353 ERROR Persistence.CommitCodeChangeSaver.<init>(CommitCodeChangeSaver.java:20) - java.sql.SQLException: path to 'C:\Users\Feifei\dataset\tracescore\seam2.sqlite3': 'C:\Users\Feifei' does not exist
+2023-10-12 22:19:42,081 ERROR Persistence.CommitCodeChangeSaver.save(CommitCodeChangeSaver.java:52) - org.sqlite.SQLiteException: [SQLITE_ERROR] SQL error or missing database (table CommitCodeChange has 2 columns but 3 values were supplied)

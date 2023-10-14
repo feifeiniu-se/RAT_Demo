@@ -21,12 +21,10 @@ public abstract class CodeBlockTime implements Cloneable, Serializable {
     CodeBlock parentCodeBlock;
     CodeBlock owner;
 
-    int oldStartLineNum;
-    int oldEndLineNum;
-    int newStartLineNum;
-    int newEndLineNum;
-    HashMap<Integer, OpeTypeEnum> newChangeLines;
-    HashMap<Integer, OpeTypeEnum> oldChangeLines;
+    int oldStartLineNum = -1;
+    int oldEndLineNum = -1;
+    int newStartLineNum = -1;
+    int newEndLineNum = -1;
 
     public abstract String getSignature();
     public abstract Set<CodeBlock> getPackages();

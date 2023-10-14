@@ -105,15 +105,15 @@ public class start {
 //        };
 
         Project p = new Project(info);
-//        String database = "C:\\Users\\Feifei\\dataset\\tracescore\\seam2.sqlite3";
+        String database = "D:\\tool\\database\\seam2.sqlite3";
         Constructor constructor = new Constructor(p);
         constructor.start();// start code analysis
         List<CodeBlock> codeBlocks = constructor.getCodeBlocks();  //
         List<CommitCodeChange> commits = constructor.getCodeChange();  // commitId对应hash值，代表在当前commit hash中，纵向
         HashMap<String, CodeBlock> mappings = constructor.getMappings();
-        // codeBlockId、commitId可以唯一确定一个codeblocktime，但也有可能是没有东西的
-//        save(codeBlocks, commits);
-
+//        // codeBlockId、commitId可以唯一确定一个codeblocktime，但也有可能是没有东西的
+////        save(codeBlocks, commits);
+//
 ////        log.info("Constructor finished.");
 ////        log.info("Start to save CommitCodeChange");
 //        CommitCodeChangeSaver commitCodeChangeSaver = new CommitCodeChangeSaver(database);

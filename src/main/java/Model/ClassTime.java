@@ -39,23 +39,6 @@ public class ClassTime extends CodeBlockTime {
         owner = own;
         own.addHistory(this);
         cmt.addCodeChange(this);
-        if (parent.getType().equals(CodeBlockType.Class)) {//if the parent is a class
-            ClassTime parentTime = (ClassTime) parent.getLastHistory().clone();
-            parentTime.setTime(cmt);
-            parentTime.setRefactorType(tp);
-            parentTime.getClasses().add(own);
-            parent.addHistory(parentTime);
-            cmt.addCodeChange(parentTime);
-        } else if (parent.getType().equals(CodeBlockType.Package)) {// if the parent is a package
-            PackageTime parentTime = (PackageTime)parent.getLastHistory().clone();
-            parentTime.setTime(cmt);
-            parentTime.setRefactorType(tp);
-            parentTime.getClasses().add(own);
-            parent.addHistory(parentTime);
-            cmt.addCodeChange(parentTime);
-        }else{
-            System.out.println("Wrong: classTime");
-        }
     }
 
     @Override
@@ -73,6 +56,9 @@ public class ClassTime extends CodeBlockTime {
 
     @Override
     public String getSignature() {
+        if(getParentCodeBlock() == null){
+            System.out.println(111);
+        }
         return this.getParentCodeBlock().getLastHistory().getSignature()+"."+this.getName();
     }
 

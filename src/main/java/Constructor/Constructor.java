@@ -46,7 +46,7 @@ public class Constructor {
             HashMap<String, DiffFile> fileList1 =  project.getDiffList(hashCode);
             if(fileList1==null){continue;}//no file changes during this commit
             Map<String, DiffFile> fileList = fileList1.entrySet().stream()
-                    .filter(p -> FileType.ADD.equals(p.getValue().getType())|| FileType.MODIFY.equals(p.getValue().getType()))
+                    .filter(p -> !FileType.DELETE.equals(p.getValue().getType()))
                     .collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue()));
 
             //if refactoring is not null, separate them into three levels: package, class, method&attribute
@@ -56,6 +56,10 @@ public class Constructor {
             Map<String, String> fileContents = fileList.entrySet().stream()
                     .collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue().getContent()));
             Set<String> repositoryDirectories = populateDirectories(fileContents);
+
+            Visitor visitor = new Visitor();
+            visitor.visit(fileContents, codeBlocks, codeChange, mappings, repositoryDirectories, fileList);
+
 
             //packageLevel: firstly refactorings, then javaParser visitor
             System.out.println("--------Package Level--------");
@@ -69,16 +73,9 @@ public class Constructor {
                     }
                 }
             }
-//            if(!fileList.isEmpty()) {
-//                for (Map.Entry<String, DiffFile> file : fileList.entrySet()) {
-////                    System.out.println(file.getValue().getPath());
-//                    String fileContent = file.getValue().getContent();
-//                    PackageVisitor pkgVisitor = new PackageVisitor();
-//                    pkgVisitor.packageVisitor(fileContent, codeBlocks, codeChange, mappings);
-//                }
-//            }
-            PackageVisitor packageVisitor = new PackageVisitor();
-            packageVisitor.packageVisitor(fileContents, repositoryDirectories, codeBlocks, codeChange, mappings);
+
+//            PackageVisitor packageVisitor = new PackageVisitor();
+//            packageVisitor.packageVisitor(fileContents, repositoryDirectories, codeBlocks, codeChange, mappings);
             updateMappings(mappings, codeBlocks);
 
             System.out.println("--------Class Level--------");
@@ -94,17 +91,10 @@ public class Constructor {
                     }
                 }
             }
-//            if(!fileList.isEmpty()) {
-//                for (Map.Entry<String, DiffFile> file : fileList.entrySet()) {
-//                    String fileContent = file.getValue().getContent();
-//                    ClassVisitor classVisitor = new ClassVisitor();
-////                    System.out.println(file.getValue().getPath());
-//                    classVisitor.classVisitor(fileContent, codeBlocks, codeChange, mappings);
-//                }
-//            }
-            ClassVisitor classVisitor = new ClassVisitor();
-            classVisitor.classVisitor(fileContents, repositoryDirectories, codeBlocks, codeChange, mappings);
-//            updateMappings(mappings, codeBlocks);
+
+//            ClassVisitor classVisitor = new ClassVisitor();
+//            classVisitor.classVisitor(fileContents, repositoryDirectories, codeBlocks, codeChange, mappings);
+            updateMappings(mappings, codeBlocks);
 //            //method and attribute level: firstly refactoring, then javaparser visitor
             System.out.println("--------Method Level--------");
             if (refact != null && commitTime.getPreCommit() != null) {
@@ -126,16 +116,9 @@ public class Constructor {
 
                 }
             }
-//            if(!fileList.isEmpty()){
-//                for(Map.Entry<String, DiffFile> file: fileList.entrySet()){
-//                    String fileContent = file.getValue().getContent();
-//                    MethodAndAttributeVisitor methodAndAttributeVisitor = new MethodAndAttributeVisitor();//including inner class, method, attribute
-//                    methodAndAttributeVisitor.methodAAttributeVisitor(fileContent, codeBlocks, codeChange, mappings);
-//                }
-//            }
-            MethodAndAttributeVisitor methodAndAttributeVisitor = new MethodAndAttributeVisitor();
-            methodAndAttributeVisitor.methodAAttributeVisitor(fileContents, repositoryDirectories, codeBlocks, codeChange, mappings, classVisitor);
-            classVisitor.processResidualClass();
+//            MethodAndAttributeVisitor methodAndAttributeVisitor = new MethodAndAttributeVisitor();
+//            methodAndAttributeVisitor.methodAAttributeVisitor(fileContents, repositoryDirectories, codeBlocks, codeChange, mappings, classVisitor);
+//            classVisitor.processResidualClass();
             updateMappings(mappings, codeBlocks);
         }
     }
