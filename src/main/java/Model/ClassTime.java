@@ -56,9 +56,6 @@ public class ClassTime extends CodeBlockTime {
 
     @Override
     public String getSignature() {
-        if(getParentCodeBlock() == null){
-            System.out.println(111);
-        }
         return this.getParentCodeBlock().getLastHistory().getSignature()+"."+this.getName();
     }
 

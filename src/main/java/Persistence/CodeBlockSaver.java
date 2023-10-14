@@ -107,9 +107,6 @@ public class CodeBlockSaver {
         try {
             PreparedStatement preparedStatement = helper.getPreparedStatement("insert into CodeBlockTimeChild (codeBlockTimeId,codeBlockChildId,codeBlockChildType) values(?,?,?);");  // ( 父亲, 孩子, link类型 )
             for (CodeBlockTime codeBlockTime : codeBlockTimes) {
-                if(codeBlockTime2Id.get(codeBlockTime) == null){
-                    System.out.println(114514);
-                }
                 preparedStatement.setInt(1, codeBlockTime2Id.get(codeBlockTime));
                 if (codeBlockTime instanceof AttributeTime) {
                     constructPreparedStatementForAttributeTime(preparedStatement, (AttributeTime) codeBlockTime);

@@ -3,22 +3,12 @@ import java.io.FileNotFoundException;
 import java.lang.ref.WeakReference;
 import java.util.*;
 
-import Constructor.Enums.CodeBlockType;
-import Constructor.Enums.Operator;
-import Constructor.Visitors.ClassVisitor;
-import Constructor.Visitors.MethodAndAttributeVisitor;
-import Model.ClassTime;
 import Model.CodeBlock;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.*;
-import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
-
-import static Constructor.Utils.*;
-import static org.apache.commons.codec.digest.DigestUtils.sha1Hex;
 
 
 public class test {
