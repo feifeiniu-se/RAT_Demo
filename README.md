@@ -3,7 +3,7 @@ This is the implementation of RAT tool, which is in paper: "RAT: A Refactoring-A
 
 Related work has been published in ICSE 2023: "RAT: A Refactoring-Aware Traceability Model for Bug Localization."
 
-Funny story: The name "RAT" came from my Chinese zodiac, and I wear a rat necklace.
+Funny story: The name "RAT" came from my Chinese zodiac, and my necklace is a little rat holding an apple, means safe and healthy.
 
 <h2 id="1"> How to run </h2>
 RAT is command line tool so far... For future we may support IDEs, browers...
