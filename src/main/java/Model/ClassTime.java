@@ -39,6 +39,11 @@ public class ClassTime extends CodeBlockTime {
         owner = own;
         own.addHistory(this);
         cmt.addCodeChange(this);
+
+        CodeBlockTime parentTime = parent.getLastHistory();
+        if(parentTime.getClasses() != null){
+            parentTime.getClasses().add(own);
+        }
     }
 
     @Override

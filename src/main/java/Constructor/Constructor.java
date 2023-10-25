@@ -57,13 +57,15 @@ public class Constructor {
                     .collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue().getContent()));
             Set<String> repositoryDirectories = populateDirectories(fileContents);
 
+            RefactoringParser refactoringParser = new RefactoringParser();
+            Map<String, String> renameCodeBlockName = refactoringParser.parse(refact, mappings);
             Visitor visitor = new Visitor();
-            visitor.visit(fileContents, codeBlocks, codeChange, mappings, repositoryDirectories, fileList);
+            visitor.visit(fileContents, codeBlocks, codeChange, mappings, repositoryDirectories, fileList, renameCodeBlockName);
 
 
             //packageLevel: firstly refactorings, then javaParser visitor
             if (refact != null && commitTime.getPreCommit() != null) {
-                System.out.println("--------Package Level--------");
+//                System.out.println("--------Package Level--------");
                 if (!refact.getRefactorings().isEmpty()) {
                     List<Refactoring> packageLevelRefactorings = refact.filter("package");
                     if (!packageLevelRefactorings.isEmpty()) {
@@ -80,7 +82,7 @@ public class Constructor {
 
             //classLevel; firstly refactorings, then javaparser visitor
             if (refact != null && commitTime.getPreCommit() != null) {
-                System.out.println("--------Class Level--------");
+//                System.out.println("--------Class Level--------");
                 if (!refact.getRefactorings().isEmpty()) {
                     // class level
                     List<Refactoring> classLevelRefactorings = refact.filter("class");
@@ -97,7 +99,7 @@ public class Constructor {
             updateMappings(mappings, codeBlocks);
 //            //method and attribute level: firstly refactoring, then javaparser visitor
             if (refact != null && commitTime.getPreCommit() != null) {
-                System.out.println("--------Method Level--------");
+//                System.out.println("--------MethodAndAttribute Level--------");
                 if (!refact.getRefactorings().isEmpty()) {
                     //method & attribute
                     List<Refactoring> methodAndAttributeLevelRefactorings = refact.filter("methodAndAttribute");

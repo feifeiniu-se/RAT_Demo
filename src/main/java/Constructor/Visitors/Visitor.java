@@ -16,13 +16,15 @@ public class Visitor {
     private CommitCodeChange commitCodeChange;
     private HashMap<String, CodeBlock> residualMethodMap;
     private Map<String, DiffFile> diffMap;
+    private Map<String, String> renameCodeBlockName;
 
-    public void visit(Map<String, String> javaFileContents, List<CodeBlock> codeBlocks, List<CommitCodeChange> codeChange, HashMap<String, CodeBlock> mappings, Set<String> repositoryDirectories, Map<String, DiffFile> fileList) {
+    public void visit(Map<String, String> javaFileContents, List<CodeBlock> codeBlocks, List<CommitCodeChange> codeChange, HashMap<String, CodeBlock> mappings, Set<String> repositoryDirectories, Map<String, DiffFile> fileList, Map<String, String> renameCodeBlockName) {
         this.codeBlocks = codeBlocks;
         this.mappings = mappings;
         this.commitCodeChange = codeChange.get(codeChange.size() - 1); //获得当前commit的内容
-        residualMethodMap = new HashMap<>();
+        this.residualMethodMap = new HashMap<>();
         this.diffMap = fileList;
+        this.renameCodeBlockName = renameCodeBlockName;
 
         Reader reader= new Reader(javaFileContents, repositoryDirectories);
     }
@@ -43,11 +45,18 @@ public class Visitor {
             CodeBlock codeBlock;
             PackageTime packageTime;
             if(!mappings.containsKey(packageName)){
-                //if mappings don't contain package, then create
-                codeBlock = new CodeBlock(codeBlocks.size() + 1, CodeBlockType.Package);
-                mappings.put(packageName, codeBlock);//更新mapping， codeblocks， commitcodechange
-                codeBlocks.add(codeBlock);
-                packageTime = new PackageTime(packageName, commitCodeChange, Operator.Add_Package, codeBlock);
+                if(renameCodeBlockName.containsKey(packageName)){
+                    codeBlock = mappings.get(renameCodeBlockName.get(packageName));
+                    packageTime = (PackageTime) codeBlock.getLastHistory().clone();
+                    commitCodeChange.addCodeChange(packageTime);
+                    codeBlock.addHistory(packageTime);
+                    mappings.put(packageName, codeBlock);
+                }else {
+                    codeBlock = new CodeBlock(codeBlocks.size() + 1, CodeBlockType.Package);
+                    mappings.put(packageName, codeBlock);
+                    codeBlocks.add(codeBlock);
+                    packageTime = new PackageTime(packageName, commitCodeChange, Operator.Add_Package, codeBlock);
+                }
             } else {
                 codeBlock = mappings.get(packageName);
                 packageTime = (PackageTime) codeBlock.getLastHistory().clone();
@@ -77,14 +86,23 @@ public class Visitor {
             ClassTime classTime = null;
             CodeBlockTime oldTime = null;
             int startLine = cu.getLineNumber(enumDeclaration.getStartPosition());
-            int endLine = cu.getLineNumber(enumDeclaration.getStartPosition() + enumDeclaration.getLength());
+            int endLine = cu.getLineNumber(enumDeclaration.getStartPosition() + enumDeclaration.getLength() - 1);
 
             if (!mappings.containsKey(signature)) {
-                codeBlock = new CodeBlock(codeBlocks.size() + 1, CodeBlockType.Class);
-                oldTime = codeBlock.getLastHistory();
-                mappings.put(signature, codeBlock);
-                codeBlocks.add(codeBlock);
-                classTime = new ClassTime(className, commitCodeChange, Operator.Add_Class, codeBlock, pkgBlock);//create classTime, add to classBlock, commitTime, update parentBlock
+                if(renameCodeBlockName.containsKey(signature)){
+                    codeBlock = mappings.get(renameCodeBlockName.get(signature));
+                    oldTime = codeBlock.getLastHistory();
+                    classTime = (ClassTime) codeBlock.getLastHistory().clone();
+                    commitCodeChange.addCodeChange(classTime);
+                    codeBlock.addHistory(classTime);
+                    mappings.put(signature, codeBlock);
+                }else {
+                    codeBlock = new CodeBlock(codeBlocks.size() + 1, CodeBlockType.Class);
+                    mappings.put(signature, codeBlock);
+                    codeBlocks.add(codeBlock);
+                    oldTime = codeBlock.getLastHistory();
+                    classTime = new ClassTime(className, commitCodeChange, Operator.Add_Class, codeBlock, pkgBlock);
+                }
             } else {
                 for(int i = startLine; i <= endLine; i++){
                     if(diffMap.containsKey(sourceFile) && diffMap.get(sourceFile).containsChangeLine(i)){
@@ -133,14 +151,23 @@ public class Visitor {
             ClassTime classTime = null;
             CodeBlockTime oldTime = null;
             int startLine = cu.getLineNumber(typeDeclaration.getStartPosition());
-            int endLine = cu.getLineNumber(typeDeclaration.getStartPosition() + typeDeclaration.getLength());
+            int endLine = cu.getLineNumber(typeDeclaration.getStartPosition() + typeDeclaration.getLength() - 1);
 
             if (!mappings.containsKey(signature)) {
-                codeBlock = new CodeBlock(codeBlocks.size() + 1, CodeBlockType.Class);
-                oldTime = codeBlock.getLastHistory();
-                mappings.put(signature, codeBlock);
-                codeBlocks.add(codeBlock);
-                classTime = new ClassTime(className, commitCodeChange, Operator.Add_Class, codeBlock, pkgBlock);//create classTime, add to classBlock, commitTime, update parentBlock
+                if(renameCodeBlockName.containsKey(signature)){
+                    codeBlock = mappings.get(renameCodeBlockName.get(signature));
+                    oldTime = codeBlock.getLastHistory();
+                    classTime = (ClassTime) codeBlock.getLastHistory().clone();
+                    commitCodeChange.addCodeChange(classTime);
+                    codeBlock.addHistory(classTime);
+                    mappings.put(signature, codeBlock);
+                }else {
+                    codeBlock = new CodeBlock(codeBlocks.size() + 1, CodeBlockType.Class);
+                    mappings.put(signature, codeBlock);
+                    codeBlocks.add(codeBlock);
+                    oldTime = codeBlock.getLastHistory();
+                    classTime = new ClassTime(className, commitCodeChange, Operator.Add_Class, codeBlock, pkgBlock);
+                }
             } else {
                 for(int i = startLine; i <= endLine; i++){
                     if(diffMap.containsKey(sourceFile) && diffMap.get(sourceFile).containsChangeLine(i)){
@@ -255,22 +282,28 @@ public class Visitor {
         String signature_method = signature + ":" + methodName;
 
         //处理完毕，生成CodeBlock和CodeBlockTime
-        CodeBlock codeBlock;
+        CodeBlock codeBlock = null;
         MethodTime methodTime = null;
         CodeBlock classBlock = mappings.get(signature);
         CodeBlockTime oldTime = null;
         int startLine = cu.getLineNumber(md.getStartPosition());
-        int endLine = cu.getLineNumber(md.getStartPosition() + md.getLength());
+        int endLine = cu.getLineNumber(md.getStartPosition() + md.getLength() - 1);
 
         if (!mappings.containsKey(signature_method)) {
-            codeBlock = new CodeBlock(codeBlocks.size() + 1, CodeBlockType.Method);
-            oldTime = codeBlock.getLastHistory();
-            mappings.put(signature_method, codeBlock);
-            if(!residualMethodMap.containsKey(signature + "." + umlOperation.getName())){
-                residualMethodMap.put(signature + "." + umlOperation.getName(), codeBlock);
+            if(renameCodeBlockName.containsKey(signature_method)){
+                codeBlock = mappings.get(renameCodeBlockName.get(signature_method));
+                oldTime = codeBlock.getLastHistory();
+                methodTime = (MethodTime) codeBlock.getLastHistory().clone();
+                commitCodeChange.addCodeChange(methodTime);
+                codeBlock.addHistory(methodTime);
+                mappings.put(signature_method, codeBlock);
+            }else {
+                codeBlock = new CodeBlock(codeBlocks.size() + 1, CodeBlockType.Method);
+                mappings.put(signature_method, codeBlock);
+                codeBlocks.add(codeBlock);
+                oldTime = codeBlock.getLastHistory();
+                methodTime = new MethodTime(methodName, commitCodeChange, Operator.Add_Method, codeBlock, classBlock, parameterTypes.toString());
             }
-            codeBlocks.add(codeBlock);
-            methodTime = new MethodTime(methodName, commitCodeChange, Operator.Add_Method, codeBlock, classBlock, parameterTypes.toString());
         } else {
             for(int i = startLine; i <= endLine; i++) {
                 if (diffMap.containsKey(sourceFile) && diffMap.get(sourceFile).containsChangeLine(i)) {
@@ -282,7 +315,9 @@ public class Visitor {
                     break;
                 }
             }
-
+        }
+        if(!residualMethodMap.containsKey(signature + "." + umlOperation.getName())){
+            residualMethodMap.put(signature + "." + umlOperation.getName(), codeBlock);
         }
 
         if (methodTime != null){
@@ -309,14 +344,23 @@ public class Visitor {
         CodeBlock classBlock = mappings.get(signature);
         CodeBlockTime oldTime = null;
         int startLine = cu.getLineNumber(fd.getStartPosition());
-        int endLine = cu.getLineNumber(fd.getStartPosition() + fd.getLength());
+        int endLine = cu.getLineNumber(fd.getStartPosition() + fd.getLength() - 1);
 
         if (!mappings.containsKey(signature_attribute)) {
-            codeBlock = new CodeBlock(codeBlocks.size() + 1, CodeBlockType.Attribute);
-            oldTime = codeBlock.getLastHistory();
-            mappings.put(signature_attribute, codeBlock);
-            codeBlocks.add(codeBlock);
-            attriTime = new AttributeTime(attributeName, commitCodeChange, Operator.Add_Attribute, codeBlock, classBlock);
+            if(renameCodeBlockName.containsKey(signature_attribute)){
+                codeBlock = mappings.get(renameCodeBlockName.get(signature_attribute));
+                oldTime = codeBlock.getLastHistory();
+                attriTime = (AttributeTime) codeBlock.getLastHistory().clone();
+                commitCodeChange.addCodeChange(attriTime);
+                codeBlock.addHistory(attriTime);
+                mappings.put(signature_attribute, codeBlock);
+            }else {
+                codeBlock = new CodeBlock(codeBlocks.size() + 1, CodeBlockType.Attribute);
+                mappings.put(signature_attribute, codeBlock);
+                codeBlocks.add(codeBlock);
+                oldTime = codeBlock.getLastHistory();
+                attriTime = new AttributeTime(attributeName, commitCodeChange, Operator.Add_Attribute, codeBlock, classBlock);
+            }
         } else {
             for(int i = startLine; i <= endLine; i++) {
                 if (diffMap.containsKey(sourceFile) && diffMap.get(sourceFile).containsChangeLine(i)) {
@@ -334,7 +378,6 @@ public class Visitor {
         if(attriTime != null){
             attriTime.setNewStartLineNum(startLine);
             attriTime.setNewEndLineNum(endLine);
-
 
             if(oldTime != null){
                 attriTime.setOldStartLineNum(oldTime.getNewStartLineNum());

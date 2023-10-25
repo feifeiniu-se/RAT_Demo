@@ -17,12 +17,10 @@ public class AttributeTime extends CodeBlockTime{
         cmt.addCodeChange(this);
         own.addHistory(this);
 
-        ClassTime parentTime = (ClassTime) parent.getLastHistory().clone();
-        parentTime.setTime(cmt);
-        parentTime.setRefactorType(tp);
-        parentTime.getAttributes().add(own);
-        parent.addHistory(parentTime);
-        cmt.addCodeChange(parentTime);
+        CodeBlockTime parentTime = parent.getLastHistory();
+        if(parentTime.getAttributes() != null){
+            parentTime.getAttributes().add(own);
+        }
     }
 
 

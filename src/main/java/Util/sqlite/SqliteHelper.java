@@ -28,10 +28,10 @@ public class SqliteHelper {
 
     private Connection getConnection() throws SQLException, ClassNotFoundException {
         if (connection == null) {
-            logger.info("Create new connection.");
+//            logger.info("Create new connection.");
             connection = getConnection(dbFilePath);
         }
-        logger.info("Connection already exists.");
+//        logger.info("Connection already exists.");
         return connection;
     }
 

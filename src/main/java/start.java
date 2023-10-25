@@ -138,10 +138,10 @@ public class start {
             x = x + cb.getHistory().size();
         }
 
-        System.out.println(x);
-        System.out.println(codeBlocks.size());
-        System.out.println(commits.size());
-        System.out.println(mappings.size());
+        System.out.println("CodeBlockTimeNum : " + x);
+        System.out.println("CodeBlockNum : " + codeBlocks.size());
+        System.out.println("CommitNum : " + commits.size());
+        System.out.println("MappingNum : " + mappings.size());
     }
 
     private static String getStartCommitId(Repository repository) throws IOException, GitAPIException {

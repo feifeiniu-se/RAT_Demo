@@ -23,6 +23,11 @@ public class MethodTime extends CodeBlockTime{
         parameters = params;
         cmt.addCodeChange(this);
         own.addHistory(this);
+
+        CodeBlockTime parentTime = parent.getLastHistory();
+        if(parentTime.getMethods() != null){
+            parentTime.getMethods().add(own);
+        }
     }
 
 
