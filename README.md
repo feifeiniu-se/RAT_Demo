@@ -57,5 +57,13 @@ For future we may support IDEs, Chrome extension...
 
 <h2 id="4"> Evaluation </h2>
 The evaluation of this tool is based on our previous work on ICSE2023.
+
+We evaluate our tool on three bug localization techniques: SimiScore, TraceScore and BugCache.
+
+
 <h2 id="5"> Demonstration of Usage</h2>
+
+For developers: This tool gives 
+
+For researchers:
 <h2 id="6"> How to cite this paper</h2>
