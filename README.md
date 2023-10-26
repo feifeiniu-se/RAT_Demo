@@ -17,13 +17,33 @@ Related work has been published in ICSE 2023: "RAT: A Refactoring-Aware Traceabi
 
 Funny story: The name "RAT" came from my Chinese zodiac, and my necklace is a little rat holding an apple, means safe and healthy.
 
-<h2 id="2"> Refactoring Types
+<h2 id="2"> Refactoring Types </h2>
 
-| Refactory Type   | Age  | Location     |
-| ------ | ---- | ------------ |
-| Alice  | 25   | New York     |
-| Bob    | 30   | Los Angeles  |
-| Carol  | 28   | Chicago      |
+Here we list the refactoring types RAT used for reconstruct code history:
+
+| Refactory Type   | Code Change Type  | Refactoring Type | Code Change Type |
+| ---------------- | ----------------- | ---------------- | ---------------- |
+| Rename Package  | rename             | Merge Parameter  | rename           |
+| Move Package    | rename             | Split Parameter  | rename           |
+| Split Package   | derive             | Add Parameter    | rename           |
+| Merge Package   | derive             | Remove Parameter | rename           |
+| Rename Class    | rename             | Reorder Parameter| rename           |
+| Move Class      | rename             | Change Parameter Type | rename      |
+| Move and Rename Class| rename        | Rename Attribute | rename           |
+| Merge Class     | derive             | Move Attribute   | rename           |
+| Extract Class   | derive             | Move and Rename Attribute| rename   |
+| Extract Superclass| derive           | Merge Attribute  | derive           |
+| Extract Subclass | derive            | Split Attribute  | derive           |
+| Extract Interface| derive            | Extract Attribute| derive           |
+| Rename Method   | rename             | Inline Attribute | derive           |
+| Move Method     | rename             | Pull Up Attribute| derive           |
+| Move and Rename Method| rename       | Push Down Attribute| derive         |
+| Extract and Move Method | derive     | Change Attribute Type| rename       |
+| Extract Method  | derive             | Encapsulate Attribute|             
+| Inline Method   | derive             | Parameterize Attribute|
+| Pull Up Method  | derive             | Replace Attribute with Variable|
+| Move and Inline Method| derive       | Replace Attribute (with Attribute)|
+| Change Return Type| rename           |
 
 
 <h2 id="3"> How to run </h2>
