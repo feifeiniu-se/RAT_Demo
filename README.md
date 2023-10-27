@@ -3,7 +3,7 @@
 # Table of Contents
 
 - [General Info](#general-info)
-- [Refactoring Types](#refactoring-ypes)
+- [Refactoring Type](#refactoring-ype)
 - [How to run](#how-to-run)
 - [Evaluation](#evaluation)
 - [Demonstration of Usage](#demonstration-of-sage)
