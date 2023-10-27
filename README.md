@@ -1,4 +1,4 @@
-<img width="694" alt="image" src="https://github.com/feifeiniu-se/RAT_Demo/assets/20552618/dd4e2020-33f2-4b8b-894b-2a2b5514463a"># RAT: A Refactoring-Aware Tool for Tracking Code History
+# RAT: A Refactoring-Aware Tool for Tracking Code History
 
 # Table of Contents
 
@@ -84,7 +84,7 @@ We evaluate our tool on three bug localization techniques: SimiScore, TraceScore
 
 
 <h2 id="#5"> Demonstration of Usage</h2>
-![image](https://github.com/feifeiniu-se/RAT_Demo/assets/20552618/8ce11fb9-ff25-40f3-9d0a-892b7a358bb3)
+<img width="326" alt="image" src="https://github.com/feifeiniu-se/RAT_Demo/assets/20552618/bf11d059-7351-4c71-950c-31c8a4b54181">
 
 For developers: This tool gives us hints that the current version control system is unaware of refactoring, which shows that code refactoring breaks code history. The RAT model can be a new mechanism for version control systems for tracking code history.
 
