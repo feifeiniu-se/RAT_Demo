@@ -69,7 +69,7 @@ RAT is command line tool so far, it supports three types of commands:
 
 > -c <git-repo-folder> <commit-sha1> -s <sqlite-file-path> #detects code history between last commit and this commit
 ```
-"&lt git-repo-folder &gt" defines the path of the local repository, "&lt sqlite-file-path &gt" indicates the path for saving the SQLite database.
+"&lt; git-repo-folder &gt;" defines the path of the local repository, "&lt; sqlite-file-path &gt;" indicates the path for saving the SQLite database.
 
 Tip: SQLite is a lightweight database, which requires no server, users can read the data with python, or other interfaces.
 
