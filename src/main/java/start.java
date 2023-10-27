@@ -1,10 +1,7 @@
 import Constructor.Constructor;
 import Model.CodeBlock;
 import Model.CommitCodeChange;
-import Persistence.CodeBlockSaver;
-import Persistence.CommitCodeChangeSaver;
-import Persistence.CommitMessageSaver;
-import Persistence.MappingSaver;
+import Persistence.*;
 import Project.Project;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.Git;
@@ -118,6 +115,10 @@ public class start {
 
 //        log.info("Constructor finished.");
 //        log.info("Start to save CommitCodeChange");
+
+        TableCreator tableCreator = new TableCreator(database);
+        tableCreator.createTables();
+        tableCreator.close();
 
         CommitCodeChangeSaver commitCodeChangeSaver = new CommitCodeChangeSaver(database);
         commitCodeChangeSaver.save(commits);

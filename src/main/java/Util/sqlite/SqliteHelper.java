@@ -137,6 +137,16 @@ public class SqliteHelper {
         }
     }
 
+    public void execute(List<String> sqls) throws SQLException, ClassNotFoundException {
+        try {
+            for (String sql : sqls) {
+                getStatement().execute(sql);
+            }
+        }finally {
+//            destroyed();
+        }
+    }
+
     /**
      * 数据库资源关闭和释放
      */
