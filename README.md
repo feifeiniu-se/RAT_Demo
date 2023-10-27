@@ -3,10 +3,10 @@
 # Table of Contents
 
 - [General Info](#general-info)
-- [Refactoring Type](#refactoring-ype)
+- [Refactoring Type](#refactoring-type)
 - [How to run](#how-to-run)
 - [Evaluation](#evaluation)
-- [Demonstration of Usage](#demonstration-of-sage)
+- [Demonstration of Usage](#demonstration-of-usage)
 - [How to cite this paper](#how-to-cite-this-paper)
 
 
