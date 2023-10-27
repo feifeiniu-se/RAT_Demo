@@ -10,7 +10,7 @@
 * [How to cite this paper](#6)
 
 
-<h2 id="#1"> General Info</h2>
+<h2 id="1"> General Info</h2>
 This is the implementation of RAT tool, which is in paper: "RAT: A Refactoring-Aware Tool for Tracking Code History" submitted to ICSE 2024 Demonstration
 
 Related work has been published in ICSE 2023: "RAT: A Refactoring-Aware Traceability Model for Bug Localization."
@@ -22,7 +22,7 @@ Funny story: The name "RAT" came from my Chinese zodiac, and my necklace is a li
 <img width="653" alt="image" src="https://github.com/feifeiniu-se/RAT_Demo/assets/20552618/325a3861-a520-4f53-8977-eaff233cc5ff">
 
 
-<h2 id="#2"> Refactoring Types </h2>
+<h2 id="2"> Refactoring Types </h2>
 
 Here we list the refactoring types RAT used for reconstruct code history:
 
@@ -51,7 +51,7 @@ Here we list the refactoring types RAT used for reconstruct code history:
 | Change Return Type| rename           |
 
 
-<h2 id="#3"> How to run </h2>
+<h2 id="3"> How to run </h2>
 
 Requirements: JDK>=17
 
@@ -74,21 +74,17 @@ For future we may support IDEs, Chrome extension...
 
 
 
-<h2 id="#4"> Evaluation </h2>
+<h2 id="4"> Evaluation </h2>
 The evaluation of this tool is based on our previous work on ICSE2023.
-<img width="317" alt="image" src="https://github.com/feifeiniu-se/RAT_Demo/assets/20552618/53c35cdf-0315-4d62-9ecb-de976c4ea9a7">
-<img width="326" alt="image" src="https://github.com/feifeiniu-se/RAT_Demo/assets/20552618/f31a0d4f-4594-495b-93da-9a299c870a68">
-<img width="326" alt="image" src="https://github.com/feifeiniu-se/RAT_Demo/assets/20552618/82e31d34-79c0-4f29-b24b-cf724b06b776">
-
 We evaluate our tool on three bug localization techniques: SimiScore, TraceScore and BugCache.
 
 
-<h2 id="#5"> Demonstration of Usage</h2>
+<h2 id="5"> Demonstration of Usage</h2>
 <img width="326" alt="image" src="https://github.com/feifeiniu-se/RAT_Demo/assets/20552618/bf11d059-7351-4c71-950c-31c8a4b54181">
 
 For developers: This tool gives us hints that the current version control system is unaware of refactoring, which shows that code refactoring breaks code history. The RAT model can be a new mechanism for version control systems for tracking code history.
 
 For researchers: Researches rely on code history but ignoring code refactoring may have biase. Researchers should be careful. Our tool transfers restore the code repository, researchers can use our result to search for complete code history.
 
-<h2 id="#6"> How to cite this paper</h2>
+<h2 id="6"> How to cite this paper</h2>
 To be known...
