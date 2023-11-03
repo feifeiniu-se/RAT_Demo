@@ -978,9 +978,6 @@ public enum Operator {
             inlinedMethodTime.setRefactorType(Operator.Inline_Method);
 
             //derive relation
-            if(targetMethodBlock == null){
-                System.out.println(114514);
-            }
             MethodTime targetMethodTime = (MethodTime) targetMethodBlock.getLastHistory();
             targetMethodTime.setTime(commitTime);
             targetMethodTime.setRefactorType(Operator.Inline_Method);
@@ -1430,9 +1427,6 @@ public enum Operator {
             assert mappings.containsKey(className + ":" + oldMethod.get("MN"));
             CodeBlock codeBlock = mappings.get(className + ":" + oldMethod.get("MN"));
             mappings.put(className + ":" + newMethod.get("MN"), codeBlock);
-            if(codeBlock == null) {
-                System.out.println(114514);
-            }
             MethodTime methodTime = (MethodTime) codeBlock.getLastHistory();
             methodTime.setName(newMethod.get("MN"));
             methodTime.setTime(commitTime);
@@ -1461,9 +1455,6 @@ public enum Operator {
 //            System.out.println(className + ":" + oldMethod.get("MN"));
             assert mappings.containsKey(className + ":" + oldMethod.get("MN"));
             CodeBlock codeBlock = mappings.get(className + ":" + newMethod.get("MN"));
-            if(codeBlock == null){
-                System.out.println(114514);
-            }
             MethodTime methodTime = (MethodTime) codeBlock.getLastHistory();
             methodTime.setName(newMethod.get("MN"));
             methodTime.setTime(commitTime);

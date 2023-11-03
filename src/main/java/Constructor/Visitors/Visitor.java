@@ -73,9 +73,6 @@ public class Visitor {
             String className = enumDeclaration.getName().getFullyQualifiedName();
             String signature = packageName.equals("") ? className : packageName + "." + className;
 
-            if(signature.contains("org.apache.maven.project.builder.PomInterpolatorTag")){
-                System.out.println(114514);
-            }
 
             CodeBlock pkgBlock = mappings.get(packageName);
             String anotherName = packageName;
@@ -359,9 +356,6 @@ public class Visitor {
 
         String methodName = sb.toString();
         String signature_method = signature + ":" + methodName;
-        if(signature_method.contains("org.apache.maven.model.management.DefaultPluginManagementInjector.ManagementModelMerger")){
-            System.out.println(114514);
-        }
 
         //处理完毕，生成CodeBlock和CodeBlockTime
         CodeBlock codeBlock = null;
