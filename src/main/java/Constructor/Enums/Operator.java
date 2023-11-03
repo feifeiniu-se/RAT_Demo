@@ -822,10 +822,15 @@ public enum Operator {
             CodeBlockTime oldFatherTime = (CodeBlockTime) oldFather.getLastHistory();
             oldFatherTime.setTime(commitTime);
             oldFatherTime.setRefactorType(Operator.Move_Class);
-            oldFatherTime.getClasses().remove(classBlock);
+            if(oldFatherTime.getClasses() != null){
+                oldFatherTime.getClasses().remove(classBlock);
+            }
+
 
             //update new father
-            newFatherTime.getClasses().add(classBlock);
+            if(newFatherTime.getClasses() != null){
+                newFatherTime.getClasses().add(classBlock);
+            }
             classTime.setParentCodeBlock(newFather);
 
             System.out.println(r.getType());
@@ -930,10 +935,10 @@ public enum Operator {
             CodeBlock classBlock = mappings.get(className);
             //create new methodBlock
             CodeBlock newMethodBlock = mappings.get(className + ":" + newMethod.get("MN"));
-            if(newMethodBlock == null){
-                System.out.println(className + ":" + newMethod.get("MN"));
-                mappings.entrySet().stream().filter(p -> p.getKey().contains("org.apache.ivy.Main")).forEach(System.out::println);
-            }
+//            if(newMethodBlock == null){
+//                System.out.println(className + ":" + newMethod.get("MN"));
+//                mappings.entrySet().stream().filter(p -> p.getKey().contains("org.apache.maven.tools.plugin.util.PluginUtils")).forEach(System.out::println);
+//            }
             MethodTime methodTime = (MethodTime) newMethodBlock.getLastHistory();
             methodTime.setRefactorType(Operator.Extract_Method);
             //add new method to class
@@ -955,7 +960,7 @@ public enum Operator {
             String className = r.getLastClassName();
 //            assert r.getLeftSideLocations().get(0).getFilePath().equals(r.getRightSideLocations().get(0).getFilePath());
             HashMap<String, String> inlinedMethod = r.getLeftSideLocations().get(0).parseMethodDeclaration();//parse the method name
-            HashMap<String, String> methodNameOld = r.getLeftSideLocations().get(r.getRightSideLocations().size()).parseMethodDeclaration();
+            HashMap<String, String> methodNameOld = r.leftFilter("target method declaration before inline").get(0).parseMethodDeclaration();
             HashMap<String, String> methodNameNew = r.getRightSideLocations().get(0).parseMethodDeclaration();
             assert mappings.containsKey(className + ":" + inlinedMethod.get("MN"));
             assert mappings.containsKey(className);
@@ -973,6 +978,9 @@ public enum Operator {
             inlinedMethodTime.setRefactorType(Operator.Inline_Method);
 
             //derive relation
+            if(targetMethodBlock == null){
+                System.out.println(114514);
+            }
             MethodTime targetMethodTime = (MethodTime) targetMethodBlock.getLastHistory();
             targetMethodTime.setTime(commitTime);
             targetMethodTime.setRefactorType(Operator.Inline_Method);
@@ -1063,7 +1071,7 @@ public enum Operator {
 //            assert classBlockOld.getLastHistory().getMethods().contains(methodBlock);
 
             //create new methodBlock to the new class, the original method remains unchanged
-            CodeBlock methodBlockNew = mappings.get(newClass + ":" + oldMethod.get("MN"));
+            CodeBlock methodBlockNew = mappings.get(newClass + ":" + newMethod.get("MN"));
             MethodTime methodTimeNew = (MethodTime) methodBlockNew.getLastHistory();
             methodTimeNew.setRefactorType(Operator.Push_Down_Method);
             //add derive relation
@@ -1422,6 +1430,9 @@ public enum Operator {
             assert mappings.containsKey(className + ":" + oldMethod.get("MN"));
             CodeBlock codeBlock = mappings.get(className + ":" + oldMethod.get("MN"));
             mappings.put(className + ":" + newMethod.get("MN"), codeBlock);
+            if(codeBlock == null) {
+                System.out.println(114514);
+            }
             MethodTime methodTime = (MethodTime) codeBlock.getLastHistory();
             methodTime.setName(newMethod.get("MN"));
             methodTime.setTime(commitTime);
@@ -1449,8 +1460,10 @@ public enum Operator {
 //            System.out.println(r.getDescription());
 //            System.out.println(className + ":" + oldMethod.get("MN"));
             assert mappings.containsKey(className + ":" + oldMethod.get("MN"));
-            CodeBlock codeBlock = mappings.get(className + ":" + oldMethod.get("MN"));
-            mappings.put(className + ":" + newMethod.get("MN"), codeBlock);
+            CodeBlock codeBlock = mappings.get(className + ":" + newMethod.get("MN"));
+            if(codeBlock == null){
+                System.out.println(114514);
+            }
             MethodTime methodTime = (MethodTime) codeBlock.getLastHistory();
             methodTime.setName(newMethod.get("MN"));
             methodTime.setTime(commitTime);
@@ -1475,10 +1488,6 @@ public enum Operator {
             CodeBlock codeBlock = mappings.get(className + ":" + oldMethod.get("MN"));
             assert codeBlock != null;
             mappings.put(className + ":" + newMethod.get("MN"), codeBlock);
-            if(codeBlock == null){
-                System.out.println(className + ":" + oldMethod.get("MN"));
-                mappings.keySet().stream().filter(p -> p.contains("org.apache.maven.test.SurefirePlugin")).forEach(System.out::println);
-            }
 
             MethodTime methodTime = (MethodTime) codeBlock.getLastHistory();
             methodTime.setName(newMethod.get("MN"));
@@ -1725,7 +1734,7 @@ public enum Operator {
 
             //create new codeBlock
             assert mappings.containsKey(className);
-            CodeBlock attriBlock = mappings.get(attriNameNew);
+            CodeBlock attriBlock = mappings.get(className + ":" + attriNameNew);
             AttributeTime attributeTime = (AttributeTime) attriBlock.getLastHistory();
             attributeTime.setRefactorType(Merge_Attribute);
 
@@ -1766,8 +1775,8 @@ public enum Operator {
 
             //new derivee attributes
             for (int i = 0; i < right.size(); i++) {
-                String newAttriName = right.get(0).parseAttributeOrParameter();
-                CodeBlock attriBlock = mappings.get(newAttriName);
+                String newAttriName = right.get(i).parseAttributeOrParameter();
+                CodeBlock attriBlock = mappings.get(className + ":" + newAttriName);
                 AttributeTime attriTime = (AttributeTime) attriBlock.getLastHistory();
                 attriTime.setRefactorType(Split_Attribute);
 
@@ -1813,7 +1822,7 @@ public enum Operator {
             CodeBlock classBlock = mappings.get(className);
             String attriName = r.getRightSideLocations().get(0).parseAttributeOrParameter();
             assert !mappings.containsKey(className + ":" + attriName);
-            CodeBlock attriBlock = mappings.get(attriName);;
+            CodeBlock attriBlock = mappings.get(className + ":" + attriName);;
             AttributeTime attributeTime = (AttributeTime) attriBlock.getLastHistory();
             attributeTime.setRefactorType(Operator.Extract_Attribute);
             System.out.println(r.getType());

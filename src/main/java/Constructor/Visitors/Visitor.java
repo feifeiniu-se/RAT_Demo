@@ -6,6 +6,7 @@ import Constructor.Enums.Operator;
 import Model.*;
 import Project.Utils.DiffFile;
 import gr.uom.java.xmi.*;
+import gr.uom.java.xmi.decomposition.VariableDeclaration;
 import org.eclipse.jdt.core.dom.*;
 
 import java.util.*;
@@ -45,7 +46,7 @@ public class Visitor {
             CodeBlock codeBlock;
             PackageTime packageTime;
             if(!mappings.containsKey(packageName)){
-                if(renameCodeBlockName.containsKey(packageName)){
+                if(renameCodeBlockName.containsKey(packageName) && mappings.containsKey(renameCodeBlockName.get(packageName))){
                     codeBlock = mappings.get(renameCodeBlockName.get(packageName));
                     packageTime = (PackageTime) codeBlock.getLastHistory().clone();
                     commitCodeChange.addCodeChange(packageTime);
@@ -72,6 +73,10 @@ public class Visitor {
             String className = enumDeclaration.getName().getFullyQualifiedName();
             String signature = packageName.equals("") ? className : packageName + "." + className;
 
+            if(signature.contains("org.apache.maven.project.builder.PomInterpolatorTag")){
+                System.out.println(114514);
+            }
+
             CodeBlock pkgBlock = mappings.get(packageName);
             String anotherName = packageName;
             if(anotherName.startsWith(".")){
@@ -89,7 +94,7 @@ public class Visitor {
             int endLine = cu.getLineNumber(enumDeclaration.getStartPosition() + enumDeclaration.getLength() - 1);
 
             if (!mappings.containsKey(signature)) {
-                if(renameCodeBlockName.containsKey(signature)){
+                if(renameCodeBlockName.containsKey(signature) && mappings.containsKey(renameCodeBlockName.get(signature))){
                     codeBlock = mappings.get(renameCodeBlockName.get(signature));
                     oldTime = codeBlock.getLastHistory();
                     classTime = (ClassTime) codeBlock.getLastHistory().clone();
@@ -154,7 +159,7 @@ public class Visitor {
             int endLine = cu.getLineNumber(typeDeclaration.getStartPosition() + typeDeclaration.getLength() - 1);
 
             if (!mappings.containsKey(signature)) {
-                if(renameCodeBlockName.containsKey(signature)){
+                if(renameCodeBlockName.containsKey(signature) && mappings.containsKey(renameCodeBlockName.get(signature))){
                     codeBlock = mappings.get(renameCodeBlockName.get(signature));
                     oldTime = codeBlock.getLastHistory();
                     classTime = (ClassTime) codeBlock.getLastHistory().clone();
@@ -244,6 +249,80 @@ public class Visitor {
                 return map;
             }
         }
+
+        @Override
+        protected void processEnumConstantDeclaration(CompilationUnit cu, EnumConstantDeclaration enumConstantDeclaration, String sourceFile, UMLClass umlClass, List<UMLComment> comments) {
+            UMLJavadoc javadoc = generateJavadoc(cu, (BodyDeclaration)enumConstantDeclaration, (String)sourceFile);
+            LocationInfo locationInfo = generateLocationInfo(cu, sourceFile, enumConstantDeclaration, LocationInfo.CodeElementType.ENUM_CONSTANT_DECLARATION);
+            UMLEnumConstant enumConstant = new UMLEnumConstant(enumConstantDeclaration.getName().getIdentifier(), UMLType.extractTypeObject(umlClass.getName()), locationInfo);
+            gr.uom.java.xmi.decomposition.VariableDeclaration variableDeclaration = new VariableDeclaration(cu, sourceFile, enumConstantDeclaration);
+            enumConstant.setVariableDeclaration(variableDeclaration);
+            enumConstant.setJavadoc(javadoc);
+            distributeComments(comments, locationInfo, enumConstant.getComments());
+            enumConstant.setFinal(true);
+            enumConstant.setStatic(true);
+            enumConstant.setVisibility(Visibility.PUBLIC);
+            List<Expression> arguments = enumConstantDeclaration.arguments();
+            Iterator var11 = arguments.iterator();
+
+            while(var11.hasNext()) {
+                Expression argument = (Expression)var11.next();
+                enumConstant.addArgument(gr.uom.java.xmi.decomposition.Visitor.stringify(argument));
+            }
+
+            enumConstant.setClassName(umlClass.getName());
+            umlClass.addEnumConstant(enumConstant);
+
+            String attributeName = umlClass.getNonQualifiedName() + "_" + enumConstant.getName();
+            String signature = umlClass.getName();
+            String signature_attribute = signature + ":" + attributeName;
+
+            CodeBlock codeBlock;
+            AttributeTime attriTime = null;
+            CodeBlock classBlock = mappings.get(signature);
+            CodeBlockTime oldTime = null;
+            int startLine = cu.getLineNumber(enumConstantDeclaration.getStartPosition());
+            int endLine = cu.getLineNumber(enumConstantDeclaration.getStartPosition() + enumConstantDeclaration.getLength() - 1);
+
+            if (!mappings.containsKey(signature_attribute)) {
+                if(renameCodeBlockName.containsKey(signature_attribute) && mappings.containsKey(renameCodeBlockName.get(signature_attribute))){
+                    codeBlock = mappings.get(renameCodeBlockName.get(signature_attribute));
+                    oldTime = codeBlock.getLastHistory();
+                    attriTime = (AttributeTime) codeBlock.getLastHistory().clone();
+                    commitCodeChange.addCodeChange(attriTime);
+                    codeBlock.addHistory(attriTime);
+                    mappings.put(signature_attribute, codeBlock);
+                }else {
+                    codeBlock = new CodeBlock(codeBlocks.size() + 1, CodeBlockType.Attribute);
+                    mappings.put(signature_attribute, codeBlock);
+                    codeBlocks.add(codeBlock);
+                    oldTime = codeBlock.getLastHistory();
+                    attriTime = new AttributeTime(attributeName, commitCodeChange, Operator.Add_Attribute, codeBlock, classBlock);
+                }
+            } else {
+                for(int i = startLine; i <= endLine; i++) {
+                    if (diffMap.containsKey(sourceFile) && diffMap.get(sourceFile).containsChangeLine(i)) {
+                        codeBlock = mappings.get(signature_attribute);
+                        oldTime = codeBlock.getLastHistory();
+                        attriTime = (AttributeTime) codeBlock.getLastHistory().clone();
+                        commitCodeChange.addCodeChange(attriTime);
+                        codeBlock.addHistory(attriTime);
+                        break;
+                    }
+                }
+            }
+
+
+            if(attriTime != null){
+                attriTime.setNewStartLineNum(startLine);
+                attriTime.setNewEndLineNum(endLine);
+
+                if(oldTime != null){
+                    attriTime.setOldStartLineNum(oldTime.getNewStartLineNum());
+                    attriTime.setOldEndLineNum(oldTime.getNewEndLineNum());
+                }
+            }
+        }
     }
 
     private void methodVisitor(CompilationUnit cu, MethodDeclaration md, UMLOperation umlOperation, String sourceFile) {
@@ -280,6 +359,9 @@ public class Visitor {
 
         String methodName = sb.toString();
         String signature_method = signature + ":" + methodName;
+        if(signature_method.contains("org.apache.maven.model.management.DefaultPluginManagementInjector.ManagementModelMerger")){
+            System.out.println(114514);
+        }
 
         //处理完毕，生成CodeBlock和CodeBlockTime
         CodeBlock codeBlock = null;
@@ -290,7 +372,7 @@ public class Visitor {
         int endLine = cu.getLineNumber(md.getStartPosition() + md.getLength() - 1);
 
         if (!mappings.containsKey(signature_method)) {
-            if(renameCodeBlockName.containsKey(signature_method)){
+            if(renameCodeBlockName.containsKey(signature_method) && mappings.containsKey(renameCodeBlockName.get(signature_method))){
                 codeBlock = mappings.get(renameCodeBlockName.get(signature_method));
                 oldTime = codeBlock.getLastHistory();
                 methodTime = (MethodTime) codeBlock.getLastHistory().clone();
@@ -347,7 +429,7 @@ public class Visitor {
         int endLine = cu.getLineNumber(fd.getStartPosition() + fd.getLength() - 1);
 
         if (!mappings.containsKey(signature_attribute)) {
-            if(renameCodeBlockName.containsKey(signature_attribute)){
+            if(renameCodeBlockName.containsKey(signature_attribute) && mappings.containsKey(renameCodeBlockName.get(signature_attribute))){
                 codeBlock = mappings.get(renameCodeBlockName.get(signature_attribute));
                 oldTime = codeBlock.getLastHistory();
                 attriTime = (AttributeTime) codeBlock.getLastHistory().clone();

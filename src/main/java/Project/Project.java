@@ -151,8 +151,8 @@ public class Project {
     //return the refactorings
     public HashMap<String, Refactorings> readRefactoring() {
 //        //根据startHash和endHash生成Json
-        GenerateJsonFiles generateJsonFiles = new GenerateJsonFiles();
-        generateJsonFiles.generateJson(projectAddress, refactoringMinerAddress, startHash, endHash);
+//        GenerateJsonFiles generateJsonFiles = new GenerateJsonFiles();
+//        generateJsonFiles.generateJson(projectAddress, refactoringMinerAddress, startHash, endHash);
 
         //done
         String fileContent = readFile(refactoringMinerAddress);

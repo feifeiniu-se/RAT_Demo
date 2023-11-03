@@ -58,7 +58,12 @@ public class Constructor {
             Set<String> repositoryDirectories = populateDirectories(fileContents);
 
             RefactoringParser refactoringParser = new RefactoringParser();
-            Map<String, String> renameCodeBlockName = refactoringParser.parse(refact, mappings);
+            Map<String, String> renameCodeBlockName;
+            if (commitTime.getPreCommit() != null){
+                renameCodeBlockName = refactoringParser.parse(refact, mappings);
+            } else {
+                renameCodeBlockName = new HashMap<>();
+            }
             Visitor visitor = new Visitor();
             visitor.visit(fileContents, codeBlocks, codeChange, mappings, repositoryDirectories, fileList, renameCodeBlockName);
 

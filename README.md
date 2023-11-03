@@ -81,6 +81,8 @@ Example for how to use in command ：
 
 ```
 > java -jar TraceabilityModel-1.0-SNAPSHOT-jar-with-dependencies.jar -bc C:\dataset\jitfine\ant-ivy 929363e121230286922d1ec3aaee21b2defba5b6 dbdf9d6c0534733bf98e14de914a337e133f0123 -s D:\\tool\\database\\ant-ivy.sqlite3
+
+> java -jar TraceabilityModel-1.0-SNAPSHOT-jar-with-dependencies.jar -a C:\dataset\maven -s D:\\tool\\database\\maven.sqlite3
 ```
 
 You can replace the path of git repository, start hash code, end hash code and the path of sqlite file.
