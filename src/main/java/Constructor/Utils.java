@@ -49,7 +49,12 @@ public class Utils {
         return sig.substring(sig.lastIndexOf(".")+1);
     }
     public static String sig2Father(String sig){
-        return sig.substring(0, sig.lastIndexOf("."));
+        if(sig.lastIndexOf(".") != -1){
+            return sig.substring(0, sig.lastIndexOf("."));
+        } else {
+            return "";
+        }
+
     }
     public static void add_fatherClass(String filePath, String sig, HashMap<String, CodeBlock> mappings){
 //        String father

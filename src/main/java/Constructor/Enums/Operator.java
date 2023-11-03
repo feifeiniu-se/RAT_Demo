@@ -90,7 +90,11 @@ public enum Operator {
             //org.jboss.jms.shared.tx， oldPkgName=org.jboss.jms.shared, 所以我们从类名中获取路径
             if (!mappings.containsKey(oldPkgName)) {
                 String firstClassName = left.get(0).getCodeElement();
-                oldPkgName = firstClassName.substring(0, firstClassName.lastIndexOf("."));
+                if(firstClassName.contains(".")){
+                    oldPkgName = firstClassName.substring(0, firstClassName.lastIndexOf("."));
+                } else {
+                    oldPkgName = "";
+                }
             }
             assert (mappings.containsKey(oldPkgName));
             CodeBlock pkgBlock = mappings.get(oldPkgName);
@@ -504,7 +508,7 @@ public enum Operator {
             List<SideLocation> left = r.getLeftSideLocations();
             List<SideLocation> right = r.getRightSideLocations();
             String newSig = right.get(right.size() - 1).getCodeElement();
-            String fatherSig = newSig.substring(0, newSig.lastIndexOf("."));
+            String fatherSig = sig2Father(newSig);
 
             assert left.size() == right.size() - 1;
             assert left.size() == oldNames.length;
@@ -574,7 +578,7 @@ public enum Operator {
             String newSig = right.get(1).getCodeElement();
             String originSigOld = left.get(0).getCodeElement();
             String originSigNew = right.get(0).getCodeElement();
-            String newFatherName = newSig.substring(0, newSig.lastIndexOf("."));
+            String newFatherName = sig2Father(newSig);
             String newClassName = newSig.substring(newSig.lastIndexOf(".") + 1);
 
 //            System.out.println(commitTime.getCommitID());
@@ -866,8 +870,8 @@ public enum Operator {
 
             System.out.println(r.getDescription());
 
-            String tmp = oldSig.substring(0, oldSig.lastIndexOf(".")) + newSig.substring(newSig.lastIndexOf("."));//old package + new class name
-            String tmp1 = newSig.substring(0, newSig.lastIndexOf(".")) + oldSig.substring(oldSig.lastIndexOf("."));//new package + old class name
+            String tmp = sig2Father(oldSig) + "." + newSig.substring(newSig.lastIndexOf(".")+1);//old package + new class name
+            String tmp1 = sig2Father(newSig) + "." + oldSig.substring(oldSig.lastIndexOf(".")+1);//new package + old class name
 
             assert mappings.containsKey(oldSig);
             CodeBlock classBlock = mappings.get(oldSig);
@@ -888,7 +892,7 @@ public enum Operator {
 
             CodeBlock newFather;
             CodeBlockTime newFatherTime;
-            newFather = mappings.get(newSig.substring(0, newSig.lastIndexOf(".")));
+            newFather = mappings.get(sig2Father(newSig));
             newFatherTime = (CodeBlockTime) newFather.getLastHistory();
             newFatherTime.setTime(commitTime);
             newFatherTime.setRefactorType(Operator.Move_And_Rename_Class);

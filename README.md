@@ -47,7 +47,7 @@ Here we list the refactoring types RAT used for reconstruct code history:
 | Move Method     | rename             | Pull Up Attribute| derive           |
 | Move and Rename Method| rename       | Push Down Attribute| derive         |
 | Extract and Move Method | derive     | Change Attribute Type| rename       |
-| Extract Method  | derive             | Encapsulate Attribute|             
+| Extract Method  | derive             | Encapsulate Attribute|
 | Inline Method   | derive             | Parameterize Attribute|
 | Pull Up Method  | derive             | Replace Attribute with Variable|
 | Move and Inline Method| derive       | Replace Attribute (with Attribute)|
@@ -76,6 +76,14 @@ Tip: SQLite is a lightweight database, which requires no server, users can read 
 For future we may support IDEs, Chrome extension...
 
 
+
+Example for how to use in command ：
+
+```
+> java -jar TraceabilityModel-1.0-SNAPSHOT-jar-with-dependencies.jar -bc C:\dataset\jitfine\ant-ivy 929363e121230286922d1ec3aaee21b2defba5b6 dbdf9d6c0534733bf98e14de914a337e133f0123 -s D:\\tool\\database\\ant-ivy.sqlite3
+```
+
+You can replace the path of git repository, start hash code, end hash code and the path of sqlite file.
 
 ## Evaluation
 The evaluation of this tool is based on our previous work on ICSE2023.
