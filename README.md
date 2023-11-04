@@ -80,12 +80,24 @@ For future we may support IDEs, Chrome extension...
 Example for how to use in command ：
 
 ```
+> java -jar TraceabilityModel-1.0-SNAPSHOT-jar-with-dependencies.jar -bc C:\dataset\maven 698119ea0be74b3733fdcf49997a6bf46f160950 a15c47e27076ebfe87f4df881fe9173a7887ae50 -s D:\\tool\\database\\maven.sqlite3
+
 > java -jar TraceabilityModel-1.0-SNAPSHOT-jar-with-dependencies.jar -bc C:\dataset\jitfine\ant-ivy 929363e121230286922d1ec3aaee21b2defba5b6 dbdf9d6c0534733bf98e14de914a337e133f0123 -s D:\\tool\\database\\ant-ivy.sqlite3
 
 > java -jar TraceabilityModel-1.0-SNAPSHOT-jar-with-dependencies.jar -a C:\dataset\maven -s D:\\tool\\database\\maven.sqlite3
+
+> java -jar TraceabilityModel-1.0-SNAPSHOT-jar-with-dependencies.jar -c C:\dataset\jitfine\archiva 8e757bd2a0faec0732b512ea1d4df1e082aea6ff -s D:\\tool\\database\\archiva.sqlite3
 ```
 
 You can replace the path of git repository, start hash code, end hash code and the path of sqlite file.
+
+The following are the github URLs in the example：
+
+https://github.com/apache/ant-ivy
+
+https://github.com/apache/maven
+
+https://github.com/apache/archiva
 
 ## Evaluation
 The evaluation of this tool is based on our previous work on ICSE2023.
