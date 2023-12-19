@@ -4,6 +4,7 @@ package Constructor.Enums;
 import Model.*;
 import Project.RefactoringMiner.Refactoring;
 import Project.RefactoringMiner.SideLocation;
+import Project.Utils.DiffFile;
 
 import javax.security.auth.callback.PasswordCallback;
 import java.awt.*;
@@ -18,7 +19,7 @@ import static Constructor.Utils.*;
 public enum Operator {
     Add_Package {
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             //create new codeBlock, update mapping, commitCodeChange
             CodeBlock codeBlock = new CodeBlock(codeBlocks.size() + 1, CodeBlockType.Package);
             mappings.put(name, codeBlock);//更新mapping， codeblocks， commitcodechange
@@ -28,13 +29,13 @@ public enum Operator {
     },
     Remove_Package {
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
 
         }
     },
     Add_Class {
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String signature) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String signature, List<DiffFile> diffList) {
             //create codeblock, create codeblocktime, mapping update
             String name = sig2Name(signature);
             String fatherSig = sig2Father(signature);
@@ -48,37 +49,37 @@ public enum Operator {
     },
     Remove_Class {
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             //use mapping to find codeblock, create codeblocktime,
         }
     },
     Add_Method {
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
 
         }
     },
     Remove_Method {
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
 
         }
     },
     Add_Attribute {
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
 
         }
     },
     Remove_Attribute {
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
 
         }
     },
     Rename_Package {
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             //Rename Package A to B
             //update package name, update mappings from package, class, method, attribute, etc.
             String[] des = r.getDescription().split(" ");
@@ -119,7 +120,7 @@ public enum Operator {
     },
     Move_Package {
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             //use mappings to find codeblock, create packagetime, update mapping package, its classes, etc.
 //            String[] tmp = r.getDescription().split(" ");
 //            String oldPkgName = tmp[2];
@@ -203,12 +204,12 @@ public enum Operator {
                 if (!mappings.containsKey(newFatherName)) {
                     if (isNestedClass(right.get(i).getFilePath(), newSig)) {//如果是内部类 就需要逐级新建包 类
                         if (!mappings.containsKey(sig2Package(right.get(i).getFilePath(), newSig))) {
-                            Operator.Add_Package.apply(codeBlocks, mappings, null, commitTime, sig2Package(right.get(i).getFilePath(), newSig));//增加包节点
+                            Operator.Add_Package.apply(codeBlocks, mappings, null, commitTime, sig2Package(right.get(i).getFilePath(), newSig), diffList);//增加包节点
                         }
-                        Operator.Add_Class.apply(codeBlocks, mappings, null, commitTime, newFatherName);
+                        Operator.Add_Class.apply(codeBlocks, mappings, null, commitTime, newFatherName, diffList);
 
                     } else {
-                        Operator.Add_Package.apply(codeBlocks, mappings, null, commitTime, newFatherName);
+                        Operator.Add_Package.apply(codeBlocks, mappings, null, commitTime, newFatherName, diffList);
                     }
 
                 }
@@ -239,7 +240,7 @@ public enum Operator {
         //文件重命名
         //done create new pkgBlock, update mappings of class, method, etc
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
 //            String[] newPkgNames = cutString(r.getDescription(), "[", "]").replace(" ", "").split(",");
 //            String oldPkgName = r.getDescription().split(" ")[2];
 //            assert mappings.containsKey(oldPkgName);
@@ -318,12 +319,12 @@ public enum Operator {
                 if (!mappings.containsKey(sig2Father(newClassSig))) {
                     if (isNestedClass(right.get(i).getFilePath(), newClassSig)) {//如果是内部类 就需要逐级新建包 类
                         if (!mappings.containsKey(sig2Package(right.get(i).getFilePath(), newClassSig))) {
-                            Operator.Add_Package.apply(codeBlocks, mappings, null, commitTime, sig2Package(right.get(i).getFilePath(), newClassSig));//增加包节点
+                            Operator.Add_Package.apply(codeBlocks, mappings, null, commitTime, sig2Package(right.get(i).getFilePath(), newClassSig), diffList);//增加包节点
                         }
-                        Operator.Add_Class.apply(codeBlocks, mappings, null, commitTime, sig2Father(newClassSig));
+                        Operator.Add_Class.apply(codeBlocks, mappings, null, commitTime, sig2Father(newClassSig), diffList);
 
                     } else {
-                        Operator.Add_Package.apply(codeBlocks, mappings, null, commitTime, sig2Father(newClassSig));
+                        Operator.Add_Package.apply(codeBlocks, mappings, null, commitTime, sig2Father(newClassSig), diffList);
                     }
 
                 }
@@ -356,7 +357,7 @@ public enum Operator {
         //文件重命名
         //move classes from old package to new package, update mappings for class, method, etc
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
 //            String[] oldPkgNames = cutString(r.getDescription(), "[", "]").replace(" ", "").split(",");
 //            String[] desc = r.getDescription().split(" ");
 //            String newPkgName = desc[desc.length - 1];
@@ -429,7 +430,7 @@ public enum Operator {
                 classBlock.updateMappings(mappings, oldClassSig, newClassSig);
                 assert mappings.containsKey(sig2Father(oldClassSig));
                 if (!mappings.containsKey(sig2Father(newClassSig))) {
-                    Operator.Add_Package.apply(codeBlocks, mappings, null, commitTime, sig2Father(newClassSig));
+                    Operator.Add_Package.apply(codeBlocks, mappings, null, commitTime, sig2Father(newClassSig), diffList);
                 }
                 assert mappings.containsKey(sig2Father(newClassSig));
                 CodeBlock oldFather = mappings.get(sig2Father(oldClassSig));
@@ -460,7 +461,7 @@ public enum Operator {
     Change_Type_Declaration_Kind {//interface class, if the name should change, just update the name, no other changes
 
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             assert r.getLeftSideLocations().size() == r.getRightSideLocations().size();
             assert r.getLeftSideLocations().size() == 1;
             String nameOld = r.getLeftSideLocations().get(0).getCodeElement();
@@ -477,32 +478,24 @@ public enum Operator {
             classTime.setTime(commitTime);
             classTime.setRefactorType(Operator.Change_Type_Declaration_Kind);
 
-//            System.out.println(r.getType());
+            refactoredLine(diffList, r.getLeftSideLocations(), 'L');
+            refactoredLine(diffList, r.getRightSideLocations(), 'R');
         }
     },
     Collapse_Hierarchy {//较为复杂的 将一个具体的类的内容移到接口类中进行实现
 
         //todo
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
-//            String oldName = r.getDescription().split(" ")[2];
-//            String newName = r.getDescription().split(" ")[4];
-//            assert mappings.containsKey(oldName);
-//            assert mappings.containsKey(newName);
-//            ClassTime oldClassNew = new ClassTime((ClassTime) mappings.get(oldName).getLastHistory(), commitTime, Operator.Collapse_Hierarchy);
-//            ClassTime newClassNew = new ClassTime((ClassTime) mappings.get(newName).getLastHistory(), commitTime, Operator.Collapse_Hierarchy);
-//            oldClassNew.getDerivee().add(newClassNew);
-//            newClassNew.getDeriver().add(oldClassNew);
-//            assert r.getLeftSideLocations().size() == r.getRightSideLocations().size();
-//            assert r.getLeftSideLocations().size() == 1;
-            System.out.println(r.getType());
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            refactoredLine(diffList, r.getLeftSideLocations(), 'L');
+            refactoredLine(diffList, r.getRightSideLocations(), 'R');
         }
     },
     Extract_Superclass {
         //add a new class, the last filepath on the rightfilepath is the new superclass
         //在这里暂时没有方法和属性的移动，pull up method/attribute 一般是对应的从原来类中的方法、属性移到新的superClass中
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             String[] oldNames = cutString(r.getDescription(), "[", "]").replace(" ", "").split(",");
 
             List<SideLocation> left = r.getLeftSideLocations();
@@ -527,13 +520,17 @@ public enum Operator {
                 oldClassTime.getDerivee().add(classTime);
                 classTime.getDeriver().add(oldClassTime);
             }
+
+            refactorFirstLine(r, mappings, diffList, r.leftFilter("original sub-type declaration"), 'L');
+            refactorFirstLine(r, mappings, diffList, r.rightFilter("sub-type declaration after extraction"), 'R');
+            refactoredLine(diffList, r.rightFilter("extracted super-type declaration"), 'R');
             System.out.println(r.getType());
         }
     },
     Extract_Interface {
         //done 文件重命名 这个有点特殊
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             //左边、右边前几个分别是original类的声明，右边最后一个是新的interface
             List<SideLocation> left = r.getLeftSideLocations();
             List<SideLocation> right = r.getRightSideLocations();
@@ -562,6 +559,10 @@ public enum Operator {
                 originalClassTime.getDerivee().add(classTime);
                 classTime.getDeriver().add(originalClassTime);
             }
+
+            refactoredLine(diffList, r.rightFilter("extracted super-type declaration"), 'R');
+            refactorFirstLine(r, mappings, diffList, r.leftFilter("original sub-type declaration"), 'L');
+            refactorFirstLine(r, mappings, diffList, r.rightFilter("sub-type declaration after extraction"), 'R');
             System.out.println(r.getType());
         }
     },
@@ -571,7 +572,7 @@ public enum Operator {
         //将原来代码中的一些方法抽出来，放到新建的类中。新建一个类，将一些方法从旧的类中移到新的类中
         //左边第一个是original类抽取前的声明，右边第一个是original类抽取后的声明，第二个是抽取的类的声明。剩下所有是抽取的方法以及属性，需要进行迁移
         //create new classBlock, move classes & methods & attributes from old class to new class
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             List<SideLocation> left = r.getLeftSideLocations();
             List<SideLocation> right = r.getRightSideLocations();
             assert left.size() == 1;
@@ -599,54 +600,18 @@ public enum Operator {
             oldClassTime.getDerivee().add(classTime);
             classTime.getDeriver().add(oldClassTime);
 
-            // move from oldClassTime to newClassTime
-            //todo 为了只处理类级别 将此处注释掉
-//            assert r.rightFilter("extracted type declaration").size() == 1;//假设右侧只有一个类，如果有多个的话，就说明是有内部类
-//            List<SideLocation> extractedMethod = r.rightFilter("extracted method declaration");
-//            for (SideLocation s : extractedMethod) {
-//                HashMap<String, String> methodInfo = s.parseMethodDeclaration();
-//                assert mappings.containsKey(originSigOld + ":" + methodInfo.get("MN"));
-//                CodeBlock methodBlock = mappings.get(originSigOld + ":" + methodInfo.get("MN"));
-//                mappings.put(newSig + ":" + methodInfo.get("MN"), methodBlock);
-//
-//                MethodTime methodTime = (MethodTime) methodBlock.getLastHistory();
-//                methodTime.setTime(commitTime);
-//                methodTime.setRefactorType(Extract_Class);
-//                methodTime.setParentCodeBlock(classBlock);
-//
-//
-////               remove from old class, add to new class
-////                assert oldClassTime.getMethods().contains(methodBlock);
-//                oldClassTime.getMethods().remove(methodBlock);
-//                classTime.getMethods().add(methodBlock);
-//            }
-            //attribute processing
-            //todo 为了只处理类级别 将此处注释掉
-//            List<SideLocation> extractedAttri = r.rightFilter("extracted attribute declaration");
-//            for (SideLocation s : extractedAttri) {
-//                String attriName = s.parseAttributeOrParameter();
-//                assert mappings.containsKey(originSigOld + ":" + attriName);
-//                CodeBlock attriBlock = mappings.get(originSigOld + ":" + attriName);
-//                mappings.put(newSig + ":" + attriName, attriBlock);
-//
-//                AttributeTime attriTime = (AttributeTime) attriBlock.getLastHistory();
-//                attriTime.setTime(commitTime);
-//                attriTime.setRefactorType(Extract_Class);
-//                attriTime.setParentCodeBlock(classBlock);
-//
-//
-////               remove from old class, add to new class
-////                assert oldClassTime.getAttributes().contains(attriBlock);
-//                oldClassTime.getAttributes().remove(attriBlock);
-//                classTime.getAttributes().add(attriBlock);
-//            }
-//            System.out.println(r.getType());
+            refactoredLine(mappings, diffList, r.getLeftSideLocations(), 'L', OpeTypeEnum.R);
+            List<SideLocation> right1 = r.rightFilter("type declaration after extraction");
+            List<SideLocation> right2 = r.rightFilter("extracted type declaration");
+            refactoredLine(mappings, diffList, right1, 'R', OpeTypeEnum.R);
+            refactoredLine(mappings, diffList, right2, 'R', OpeTypeEnum.R);
+            System.out.println(r.getType());
         }
     },
     Extract_Subclass {
         @Override
         // 跟extract class几乎差不多
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             List<SideLocation> left = r.getLeftSideLocations();
             List<SideLocation> right = r.getRightSideLocations();
             assert left.size() == 1;
@@ -673,48 +638,18 @@ public enum Operator {
             oldClassTime.getDerivee().add(classTime);
             classTime.getDeriver().add(oldClassTime);
 
-            // move from oldClassTime to newClassTime
-//            assert r.rightFilter("extracted type declaration").size() == 1;//假设右侧只有一个类，如果有多个的话，就说明是有内部类
-//            List<SideLocation> extractedMethod = r.rightFilter("extracted method declaration");
-//            for (SideLocation s : extractedMethod) {
-//                HashMap<String, String> methodInfo = s.parseMethodDeclaration();
-//                assert mappings.containsKey(originSigOld + ":" + methodInfo.get("MN"));
-//                CodeBlock methodBlock = mappings.get(originSigOld + ":" + methodInfo.get("MN"));
-//                mappings.put(newSig + ":" + methodInfo.get("MN"), methodBlock);
-//
-//                MethodTime methodTime = (MethodTime) methodBlock.getLastHistory();
-//                methodTime.setTime(commitTime);
-//                methodTime.setRefactorType(Extract_Class);
-//                methodTime.setParentCodeBlock(classBlock);
-////               remove from old class, add to new class
-////                assert oldClassTime.getMethods().contains(methodBlock);
-//                oldClassTime.getMethods().remove(methodBlock);
-//                classTime.getMethods().add(methodBlock);
-//            } //todo
-//            //attribute processing
-//            List<SideLocation> extractedAttri = r.rightFilter("extracted attribute declaration");
-//            for (SideLocation s : extractedAttri) {
-//                String attriName = s.parseAttributeOrParameter();
-//                assert mappings.containsKey(originSigOld + ":" + attriName);
-//                CodeBlock attriBlock = mappings.get(originSigOld + ":" + attriName);
-//                mappings.put(newSig + ":" + attriName, attriBlock);
-//
-//                AttributeTime attriTime = (AttributeTime) attriBlock.getLastHistory();
-//                attriTime.setTime(commitTime);
-//                attriTime.setRefactorType(Extract_Class);
-//                attriTime.setParentCodeBlock(classBlock);
-////               remove from old class, add to new class
-////                assert oldClassTime.getAttributes().contains(attriBlock);
-//                oldClassTime.getAttributes().remove(attriBlock);
-//                classTime.getAttributes().add(attriBlock);
-//            } //todo
+            refactoredLine(mappings, diffList, r.getLeftSideLocations(), 'L', OpeTypeEnum.R);
+            List<SideLocation> right1 = r.rightFilter("type declaration after extraction");
+            List<SideLocation> right2 = r.rightFilter("extracted type declaration");
+            refactoredLine(mappings, diffList, right1, 'R', OpeTypeEnum.R);
+            refactoredLine(mappings, diffList, right2, 'R', OpeTypeEnum.R);
             System.out.println(r.getType());
         }
     },
     Merge_Class {//merge methods & attributes in two or more classes to one new class
 
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
 //            update class, target class, move method and attribute from original class to target class; update mapping
             List<SideLocation> left = r.getLeftSideLocations();
             List<SideLocation> right = r.getRightSideLocations();
@@ -778,12 +713,14 @@ public enum Operator {
                 oldClassTime.setAttributes(new HashSet<>());
             }
 
+            refactoredLine(mappings, diffList, r.getLeftSideLocations(), 'L', OpeTypeEnum.M);
+            refactoredLine(mappings, diffList, r.getRightSideLocations(), 'R', OpeTypeEnum.M);
             System.out.println(r.getType());
         }
     },
     Move_Class {
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             //update class, class.father, class.son
             List<SideLocation> left = r.getLeftSideLocations();
             List<SideLocation> right = r.getRightSideLocations();
@@ -810,7 +747,7 @@ public enum Operator {
             String fatherSigNew = sig2Father(newSig);//new father name
             if (!mappings.containsKey(fatherSigNew)) {//如果父亲节点不存在，就逐级新建类， 假设父亲包节点已经存在
                 assert mappings.containsKey(sig2Package(right.get(0).getFilePath(), fatherSigNew)); // 假设包已经存在mapping中了
-                Operator.Add_Class.apply(codeBlocks, mappings, null, commitTime, fatherSigNew);
+                Operator.Add_Class.apply(codeBlocks, mappings, null, commitTime, fatherSigNew, diffList);
             }
             assert mappings.containsKey(fatherSigNew);
             CodeBlock newFather = mappings.get(fatherSigNew);
@@ -833,13 +770,15 @@ public enum Operator {
             }
             classTime.setParentCodeBlock(newFather);
 
+            refactoredLine(mappings, diffList, r.getLeftSideLocations(), 'L', OpeTypeEnum.M);
+            refactoredLine(mappings, diffList, r.getRightSideLocations(), 'R', OpeTypeEnum.M);
             System.out.println(r.getType());
         }
     },
     Rename_Class {
         @Override
         // update class name, update mappings of methods, attributes, etc.
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             List<SideLocation> left = r.getLeftSideLocations();
             List<SideLocation> right = r.getRightSideLocations();
             assert left.size() == right.size();
@@ -859,13 +798,15 @@ public enum Operator {
             classTime.setTime(commitTime);
             classTime.setRefactorType(Operator.Rename_Class);
 
+            refactorFirstLine(r, mappings, diffList, r.getLeftSideLocations(), 'L');
+            refactorFirstLine(r, mappings, diffList, r.getRightSideLocations(), 'R');
             System.out.println(r.getType());
 //            System.out.println(commitTime.getCommitID());
         }
     },
     Move_And_Rename_Class {
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             List<SideLocation> left = r.getLeftSideLocations();
             List<SideLocation> right = r.getRightSideLocations();
             assert left.size() == right.size();
@@ -908,13 +849,17 @@ public enum Operator {
             oldFatherTime.setRefactorType(Operator.Move_And_Rename_Class);
             oldFatherTime.getClasses().remove(classBlock);
 
+            refactoredLine(mappings, diffList, r.getLeftSideLocations(), 'L', OpeTypeEnum.M);
+            refactoredLine(mappings, diffList, r.getRightSideLocations(), 'R', OpeTypeEnum.M);
+            refactorFirstLine(r, mappings, diffList, r.getLeftSideLocations(), 'L');
+            refactorFirstLine(r, mappings, diffList, r.getRightSideLocations(), 'R');
             System.out.println(r.getType());
         }
     },
     Extract_Method {
         //add method 从现有方法的代码中抽取部分生成新的方法，methodB derived from methodA，
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             String className = r.getLastClassName();
 
 //            System.out.println(commitTime.getCommitID());
@@ -949,6 +894,10 @@ public enum Operator {
             oldMethodTime.setRefactorType(Operator.Extract_Method);
             oldMethodTime.getDerivee().add(methodTime);
             methodTime.getDeriver().add(oldMethodTime);
+            List<SideLocation> left = r.leftFilter("extracted code from source method declaration");
+            List<SideLocation> right = r.rightFilter("extracted code to extracted method declaration");
+            refactoredLine(mappings, diffList, left, 'L', OpeTypeEnum.M);
+            refactoredLine(mappings, diffList, right, 'R', OpeTypeEnum.M);
             System.out.println(r.getType());
         }
     },
@@ -956,7 +905,7 @@ public enum Operator {
         //与extract method相反，delete 方法，将方法的内容合并到已有的方法中 左边第一个是被inline方法的声明，左边倒数第二个是target method 原来的声明 右边第一个是target method的新声明
         //deriver, derivee, parentBlock.method remove
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             String className = r.getLastClassName();
 //            assert r.getLeftSideLocations().get(0).getFilePath().equals(r.getRightSideLocations().get(0).getFilePath());
             HashMap<String, String> inlinedMethod = r.getLeftSideLocations().get(0).parseMethodDeclaration();//parse the method name
@@ -989,6 +938,10 @@ public enum Operator {
             classTime.setTime(commitTime);
             classTime.setRefactorType(Operator.Inline_Method);
             classTime.getMethods().remove(inlinedMethodBlock);
+            List<SideLocation> left = r.leftFilter("inlined code from inlined method declaration");
+            List<SideLocation> right = r.rightFilter("inlined code in target method declaration");
+            refactoredLine(mappings, diffList, left, 'L', OpeTypeEnum.M);
+            refactoredLine(mappings, diffList, right, 'R', OpeTypeEnum.M);
             System.out.println(r.getType());
         }
     },
@@ -996,7 +949,7 @@ public enum Operator {
         //move method from one class to super class,将几个子类中的方法移到超类中，跨文件，涉及方法的移动，还可能修改名字，但是不影响文件数目,一般情况下 一个refactoring只涉及一个类
         //相当于是move method //note be careful of move and rename things
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             //find method, oldclass and newclass from mappings, change parentBlock from oldclass to newClass
             String oldClass = r.getFirstClassName();
             String newClass = r.getLastClassName();
@@ -1040,13 +993,15 @@ public enum Operator {
             newClassTimeNew.setRefactorType(Operator.Pull_Up_Method);
             newClassTimeNew.getMethods().add(methodBlock);
 
+            refactoredLine(mappings, diffList, r.getLeftSideLocations(), 'L', OpeTypeEnum.M);
+            refactoredLine(mappings, diffList, r.getRightSideLocations(), 'R', OpeTypeEnum.M);
             System.out.println(r.getType());
         }
     },
     Push_Down_Method {
         @Override
         //将父类中的方法 移到子类中去，一般会在不同的文件之间进行移动，甚至还有rename pull_Up_method的对立 move and rename method
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             //find method, oldclass and newclass from mappings, create new codeBlock to the new class, the original method remains unchange
             String oldClass = r.getFirstClassName();
             String newClass = r.getLastClassName();
@@ -1083,13 +1038,15 @@ public enum Operator {
             newClassTimeNew.setTime(commitTime);
             newClassTimeNew.setRefactorType(Operator.Push_Down_Method);
             newClassTimeNew.getMethods().add(methodBlockNew);
+            refactoredLine(mappings, diffList, r.getLeftSideLocations(), 'L', OpeTypeEnum.M);
+            refactoredLine(mappings, diffList, r.getRightSideLocations(), 'R', OpeTypeEnum.M);
             System.out.println(r.getType());
         }
     },
     Extract_And_Move_Method {
         @Override
         //可能从多个方法中提取出一个新的方法， 涉及新建一个methodBlock，有多个derived from，并且移到了一个新的类中，跨文件
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             String oldClassName = r.getFirstClassName();
             String newClassName = r.getLastClassName();
             assert oldClassName.contains(".");
@@ -1116,6 +1073,8 @@ public enum Operator {
             oldMethodTime.setRefactorType(Operator.Extract_Method);
             oldMethodTime.getDerivee().add(methodTime);
             methodTime.getDeriver().add(oldMethodTime);
+            refactoredLine(mappings, diffList, r.leftFilter("extracted code from source method declaration"), 'L', OpeTypeEnum.M);
+            refactoredLine(mappings, diffList, r.rightFilter("extracted code to extracted method declaration"), 'R', OpeTypeEnum.M);
             System.out.println(r.getType());
         }
     },
@@ -1126,7 +1085,7 @@ public enum Operator {
         //right.get(0) is the declaration of target method after inline
         //move inline method, inline to targe method
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             String oldClassName = r.getFirstClassName();
             String[] tmp = r.getDescription().substring(0, r.getDescription().indexOf(" & ")).split(" ");
             String newClassName = tmp[tmp.length - 1];
@@ -1172,13 +1131,19 @@ public enum Operator {
             targetMethodTime.getDeriver().add(inlinedMethodTime);
             inlinedMethodTime.getDerivee().add(targetMethodTime);
 
+            List<SideLocation> left1 = r.leftFilter("inlined code from inlined method declaration");
+            List<SideLocation> left2 = r.leftFilter("deleted statement in inlined method declaration");
+            right = r.rightFilter("inlined code in target method declaration");
+            refactoredLine(mappings, diffList, left1, 'L', OpeTypeEnum.M);
+            refactoredLine(mappings, diffList, left2, 'L', OpeTypeEnum.R);
+            refactoredLine(mappings, diffList, right, 'R', OpeTypeEnum.M);
             System.out.println(r.getType());
         }
     },
     Move_And_Rename_Method {//跨文件
 
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             //find method, oldclass and newclass from mappings, change parentBlock from oldclass to newClass, update method name
             String oldClass = r.getFirstClassName();
             String newClass = r.getLastClassName();
@@ -1227,12 +1192,14 @@ public enum Operator {
             newClassTimeNew.setTime(commitTime);
             newClassTimeNew.setRefactorType(Operator.Move_And_Rename_Method);
             newClassTimeNew.getMethods().add(methodBlock);
+            refactoredLine(mappings, diffList, r.getLeftSideLocations(), 'L', OpeTypeEnum.M);
+            refactoredLine(mappings, diffList, r.getRightSideLocations(), 'R', OpeTypeEnum.M);
             System.out.println(r.getType());
         }
     },
     Move_Method {
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             //find method, oldclass and newclass from mappings, change parentBlock from oldclass to newClass
             String oldClass = r.getFirstClassName();
             String newClass = r.getLastClassName();
@@ -1279,13 +1246,15 @@ public enum Operator {
             newClassTimeNew.setTime(commitTime);
             newClassTimeNew.setRefactorType(Operator.Move_Method);
             newClassTimeNew.getMethods().add(methodBlock);
+            refactoredLine(mappings, diffList, r.getLeftSideLocations(), 'L', OpeTypeEnum.M);
+            refactoredLine(mappings, diffList, r.getRightSideLocations(), 'R', OpeTypeEnum.M);
             System.out.println(r.getType());
         }
     },
     Change_Return_Type { //trival 只需要修改返回类型 一般不跨文件
 
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             System.out.println(r.getDescription());
             String className = r.getLastClassName();
             List<SideLocation> left = r.getLeftSideLocations();
@@ -1307,12 +1276,14 @@ public enum Operator {
             methodTimeNew.setTime(commitTime);
             methodTimeNew.setRefactorType(Operator.Change_Return_Type);
             mappings.put(newSig, methodBlock);
+            refactoredLine(diffList, r.leftFilter("original return type"), 'L');
+            refactoredLine(diffList, r.rightFilter("changed return type"), 'R');
             System.out.println(r.getType());
         }
     },
     Rename_Method {
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             String className = r.getLastClassName();
             System.out.println(r.getDescription());
             List<SideLocation> left = r.getLeftSideLocations();
@@ -1332,6 +1303,8 @@ public enum Operator {
             methodTimeNew.setTime(commitTime);
             methodTimeNew.setRefactorType(Operator.Rename_Method);
             mappings.put(newSig, codeBlock);
+            refactorFirstLine(r, mappings, diffList, r.getLeftSideLocations(), 'L');
+            refactorFirstLine(r, mappings, diffList, r.getRightSideLocations(), 'R');
             System.out.println(r.getType());
         }
     },
@@ -1339,7 +1312,7 @@ public enum Operator {
 
         @Override
         //把方法中的一个变量 变为方法的参数 不跨文件，仅需要修改方法的名字
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             String className = r.getLastClassName();
             System.out.println(r.getDescription());
             List<SideLocation> left = r.getLeftSideLocations();
@@ -1360,13 +1333,15 @@ public enum Operator {
             methodTimeNew.setTime(commitTime);
             methodTimeNew.setRefactorType(Operator.Parameterize_Variable);
             mappings.put(newSig, methodBlock);
+            refactoredLine(mappings, diffList, r.leftFilter("original variable declaration"), 'L', OpeTypeEnum.R);
+            refactoredLine(mappings, diffList, r.rightFilter("renamed variable declaration"), 'R', OpeTypeEnum.R);
             System.out.println(r.getType());
         }
     },
     Merge_Parameter {//把一个方法的参数进行合并，但是可能会有移动 左右两边的最后一个 分别是旧新方法的声明
 
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             String className = r.getLastClassName();
             List<SideLocation> left = r.getLeftSideLocations();
             List<SideLocation> right = r.getRightSideLocations();
@@ -1384,13 +1359,15 @@ public enum Operator {
             methodTimeNew.setTime(commitTime);
             methodTimeNew.setRefactorType(Operator.Merge_Parameter);
             mappings.put(newSig, codeBlock);
+            refactoredLine(mappings, diffList, r.leftFilter("merged variable declaration"), 'L', OpeTypeEnum.R);
+            refactoredLine(mappings, diffList, r.rightFilter("new variable declaration"), 'R', OpeTypeEnum.R);
             System.out.println(r.getType());
         }
     },
     Split_Parameter {//method name change, parameterList change 左右两边的最后一个分别是旧、新方法的声明
 
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             String className = r.getLastClassName();
             List<SideLocation> left = r.getLeftSideLocations();
             List<SideLocation> right = r.getRightSideLocations();
@@ -1408,12 +1385,14 @@ public enum Operator {
             methodTimeNew.setTime(commitTime);
             methodTimeNew.setRefactorType(Operator.Split_Parameter);
             mappings.put(newSig, codeBlock);
+            refactoredLine(mappings, diffList, r.leftFilter("original variable declaration"), 'L', OpeTypeEnum.R);
+            refactoredLine(mappings, diffList, r.rightFilter("split variable declaration"), 'R', OpeTypeEnum.R);
             System.out.println(r.getType());
         }
     },
     Change_Parameter_Type {
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             String className = r.getLastClassName();
             System.out.println(r.getDescription());
             List<SideLocation> left = r.getLeftSideLocations();
@@ -1433,12 +1412,14 @@ public enum Operator {
             methodTime.setRefactorType(Operator.Change_Parameter_Type);
             methodTime.setParameters(newMethod.get("PA"));//update parameterType
 //            todo parameterType
+            refactoredLine(mappings, diffList, r.leftFilter("original variable declaration"), 'L', OpeTypeEnum.R);
+            refactoredLine(mappings, diffList, r.rightFilter("changed-type variable declaration"), 'R', OpeTypeEnum.R);
             System.out.println(r.getType());
         }
     },
     Add_Parameter {
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             String className = r.getLastClassName();
             List<SideLocation> left = r.getLeftSideLocations();
             List<SideLocation> right = r.getRightSideLocations();
@@ -1460,12 +1441,14 @@ public enum Operator {
             methodTime.setTime(commitTime);
             methodTime.setRefactorType(Operator.Add_Parameter);
             methodTime.setParameters(newMethod.get("PA"));//update parameterType//todo return type
+            refactorFirstLine(r, mappings, diffList, r.leftFilter("original method declaration"), 'L');
+            refactoredLine(diffList, r.rightFilter("added parameter"), 'R');
             System.out.println(r.getType());
         }
     },
     Remove_Parameter {
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             String className = r.getLastClassName();
             System.out.println(r.getDescription());
             List<SideLocation> left = r.getLeftSideLocations();
@@ -1485,13 +1468,15 @@ public enum Operator {
             methodTime.setTime(commitTime);
             methodTime.setRefactorType(Operator.Remove_Parameter);
             methodTime.setParameters(newMethod.get("PA"));//update parameterType
+            refactoredLine(diffList, r.leftFilter("removed parameter"), 'L');
+            refactorFirstLine(r, mappings, diffList, r.leftFilter("method declaration with removed parameter"), 'R');
             System.out.println(r.getType());
         }
     },
     Reorder_Parameter {// only change method name & method parameterList, parameterType 左边和右边的最后一个分别是旧、新方法的声明
 
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             String className = r.getLastClassName();
             System.out.println(r.getDescription());
             List<SideLocation> left = r.getLeftSideLocations();
@@ -1509,13 +1494,15 @@ public enum Operator {
             methodTimeNew.setTime(commitTime);
             methodTimeNew.setRefactorType(Operator.Reorder_Parameter);
             mappings.put(newSig, codeBlock);
+            refactoredLine(diffList, r.leftFilter("original parameter declaration"), 'L');
+            refactoredLine(diffList, r.rightFilter("reordered parameter declaration"), 'R');
             System.out.println(r.getType());
         }
     },
     Parameterize_Attribute {//把一个attribute变成一个参数，同时修改属性和方法的参数 一般不跨项目
 
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             String className = r.getLastClassName();
             List<SideLocation> left = r.getLeftSideLocations();
             List<SideLocation> right = r.getRightSideLocations();
@@ -1545,13 +1532,15 @@ public enum Operator {
             methodTimeNew.setRefactorType(Operator.Parameterize_Attribute);
             mappings.put(className + ":" + newMethod.get("MN"), methodBlock);
 
+            refactoredLine(diffList, r.leftFilter("original variable declaration"), 'L');
+            refactoredLine(diffList, r.rightFilter("renamed variable declaration"), 'R');
             System.out.println(r.getType());
         }
     },
     Pull_Up_Attribute {//把子类中的属性 移到父类中 跨文件
 
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             String oldClass = r.getFirstClassName();
             String newClass = r.getLastClassName();
             assert r.getRightSideLocations().size() == 1;
@@ -1588,13 +1577,16 @@ public enum Operator {
             newClassTimeNew.setTime(commitTime);
             newClassTimeNew.setRefactorType(Operator.Pull_Up_Attribute);
             newClassTimeNew.getAttributes().add(attriBlock);
+
+            refactoredLine(diffList, r.getLeftSideLocations(), 'L');
+            refactoredLine(diffList, r.getRightSideLocations(), 'R');
             System.out.println(r.getType());
         }
     },
     Push_Down_Attribute {// move attribute from father class to son class, normally cross class files. ≈move attribute
 
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             String oldClass = r.getFirstClassName();
             String newClass = r.getLastClassName();
             List<SideLocation> left = r.getLeftSideLocations();
@@ -1637,12 +1629,15 @@ public enum Operator {
             newClassTimeNew.setTime(commitTime);
             newClassTimeNew.setRefactorType(Operator.Push_Down_Method);
             newClassTimeNew.getAttributes().add(attriBlock);
+
+            refactoredLine(diffList, r.getLeftSideLocations(), 'L');
+            refactoredLine(diffList, r.getRightSideLocations(), 'R');
             System.out.println(r.getType());
         }
     },
     Move_Attribute {
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             String oldClass = r.getFirstClassName();
             String newClass = r.getLastClassName();
             List<SideLocation> left = r.getLeftSideLocations();
@@ -1685,12 +1680,15 @@ public enum Operator {
             newClassTimeNew.setTime(commitTime);
             newClassTimeNew.setRefactorType(Operator.Move_Attribute);
             newClassTimeNew.getAttributes().add(attriBlock);
+
+            refactoredLine(diffList, r.getLeftSideLocations(), 'L');
+            refactoredLine(diffList, r.getRightSideLocations(), 'R');
             System.out.println(r.getType());
         }
     },
     Rename_Attribute {
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             String className = r.getLastClassName();
             System.out.println(r.getDescription());
             List<SideLocation> left = r.getLeftSideLocations();
@@ -1709,12 +1707,15 @@ public enum Operator {
             attributeTime.setName(newName);
             attributeTime.setTime(commitTime);
             attributeTime.setRefactorType(Operator.Rename_Attribute);
+
+            refactoredLine(diffList, r.getLeftSideLocations(), 'L');
+            refactoredLine(diffList, r.getRightSideLocations(), 'R');
             System.out.println(r.getType());
         }
     },
     Merge_Attribute {
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             //create new attribute(update class.attribute), derive from oldAttribute A, B, C, etc.
             String className = r.getLastClassName();
             List<SideLocation> left = r.getLeftSideLocations();
@@ -1740,12 +1741,14 @@ public enum Operator {
                 attributeTimeOld.getDerivee().add(attributeTime);
                 attributeTime.getDeriver().add(attributeTimeOld);
             }
+            refactoredLine(diffList, r.getLeftSideLocations(), 'L');
+            refactoredLine(diffList, r.getRightSideLocations(), 'R');
             System.out.println(r.getType());
         }
     },
     Split_Attribute {
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             String className = r.getLastClassName();
             List<SideLocation> left = r.getLeftSideLocations();
             List<SideLocation> right = r.getRightSideLocations();
@@ -1775,12 +1778,14 @@ public enum Operator {
                 oldAttriTime.getDerivee().add(attriTime);
             }
 
+            refactoredLine(diffList, r.getLeftSideLocations(), 'L');
+            refactoredLine(diffList, r.getRightSideLocations(), 'R');
             System.out.println(r.getType());
         }
     },
     Change_Attribute_Type {
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             String className = r.getLastClassName();
             List<SideLocation> left = r.getLeftSideLocations();
             List<SideLocation> right = r.getRightSideLocations();
@@ -1799,13 +1804,15 @@ public enum Operator {
             attributeTime.setName(newName);
             attributeTime.setTime(commitTime);
             attributeTime.setRefactorType(Operator.Change_Attribute_Type);
+            refactoredLine(diffList, r.getLeftSideLocations(), 'L');
+            refactoredLine(diffList, r.getRightSideLocations(), 'R');
             System.out.println(r.getType());
         }
     },
     Extract_Attribute {//涉及增加新的attribute
 
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             String className = r.getLastClassName();
             System.out.println(r.getDescription());
 //            assert r.getLeftSideLocations().get(0).getFilePath().equals(r.getRightSideLocations().get(0).getFilePath());
@@ -1816,6 +1823,8 @@ public enum Operator {
             CodeBlock attriBlock = mappings.get(className + ":" + attriName);;
             AttributeTime attributeTime = (AttributeTime) attriBlock.getLastHistory();
             attributeTime.setRefactorType(Operator.Extract_Attribute);
+            refactoredLine(diffList, r.getLeftSideLocations(), 'L');
+            refactoredLine(diffList, r.getRightSideLocations(), 'R');
             System.out.println(r.getType());
         }
     },
@@ -1825,7 +1834,7 @@ public enum Operator {
         //Attribute encapsulation is useful when you have an attribute that is affected by several different methods,
         // each of which needs that attribute to be in a known state. To prevent programmers from changing the attribute
         // in the 4GL code, you can make the attribute private so that programmers can only access it from the object's methods.
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             //add new method
             String className = r.getLastClassName();
             assert r.getRightSideLocations().size() < 4;
@@ -1841,13 +1850,15 @@ public enum Operator {
                 MethodTime methodTime = (MethodTime) methodBlock.getLastHistory();
                 methodTime.setRefactorType(Operator.Encapsulate_Attribute);
             }
+            refactoredLine(diffList, r.getLeftSideLocations(), 'L');
+            refactoredLine(diffList, r.getRightSideLocations(), 'R');
             System.out.println(r.getType());
         }
     },
     Inline_Attribute {//remove_attribute, 去掉属性，直接使用属性的值,从旧的类中移除
 
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             //remove from oldClass
             String className = r.getLastClassName();
             String attriName = r.getLeftSideLocations().get(0).parseAttributeOrParameter();
@@ -1865,12 +1876,14 @@ public enum Operator {
             attributeTime.setTime(commitTime);
             attributeTime.setRefactorType(Operator.Inline_Attribute);
 
+            refactoredLine(diffList, r.getLeftSideLocations(), 'L');
+            refactoredLine(diffList, r.getRightSideLocations(), 'R');
             System.out.println(r.getType());
         }
     },
     Move_And_Rename_Attribute {
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             String oldClass = r.getFirstClassName();
             String newClass = r.getLastClassName();
             List<SideLocation> left = r.getLeftSideLocations();
@@ -1914,29 +1927,373 @@ public enum Operator {
             newClassTimeNew.setTime(commitTime);
             newClassTimeNew.setRefactorType(Operator.Move_Attribute);
             newClassTimeNew.getAttributes().add(attriBlock);
+            refactoredLine(diffList, r.getLeftSideLocations(), 'L');
+            refactoredLine(diffList, r.getRightSideLocations(), 'R');
             System.out.println(r.getType());
         }
     },
-    //    Replace_Attribute_(With_Attribute) {
-//        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime) {
-//            System.out.println(r.getType());
-//        }
-//    },//TODO 暂时没找到例子
+    Replace_Attribute {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            refactoredLine(diffList, r.getLeftSideLocations(), 'L');
+            refactoredLine(diffList, r.getRightSideLocations(), 'R');
+            System.out.println(r.getType());
+        }
+    },
     Replace_Attribute_With_Variable {
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
             //不太确定到底是啥 应该是涉及attribute的弃用 （但是有时候不删除attribute） 影响不大
+            refactoredLine(diffList, r.leftFilter("original variable declaration"), 'L');
+            refactoredLine(diffList, r.rightFilter("original variable declaration"), 'R');
             System.out.println(r.getType());
         }
     },
     Replace_Anonymous_With_Lambda {
         @Override
-        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name) {
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            refactoredLine(diffList, r.leftFilter("anonymous class declaration"), 'L');
+            refactoredLine(diffList, r.rightFilter("lambda expression"), 'R');
             System.out.println(r.getType());
         }
     },//TODO 暂时没找到
-    ;
 
-    public abstract void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name);
+    //todo 欠缺的添加
+    Add_Class_Annotation{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            List<SideLocation> right = r.rightFilter("added annotation");
+            refactoredLine(diffList, right, 'R');
+        }
+    },
+    Remove_Class_Annotation{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            List<SideLocation> left = r.leftFilter("removed annotation");
+            refactoredLine(diffList, left, 'L');
+        }
+    },
+    Modify_Class_Annotation{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            List<SideLocation> left = r.leftFilter("original annotation");
+            List<SideLocation> right = r.rightFilter("modified annotation");
+            refactoredLine(diffList, left, 'L');
+            refactoredLine(diffList, right, 'R');
+        }
+    },
+
+    Add_Class_Modifier{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            refactorFirstLine(r, mappings, diffList, r.getLeftSideLocations(), 'L');
+            refactorFirstLine(r, mappings, diffList, r.getRightSideLocations(), 'R');
+        }
+    },
+    Remove_Class_Modifier{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            refactorFirstLine(r, mappings, diffList, r.getLeftSideLocations(), 'L');
+            refactorFirstLine(r, mappings, diffList, r.getRightSideLocations(), 'R');
+        }
+    },
+    Change_Class_Access_Modifier{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            refactorFirstLine(r, mappings, diffList, r.getLeftSideLocations(), 'L');
+            refactorFirstLine(r, mappings, diffList, r.getRightSideLocations(), 'R');
+        }
+    },
+    Add_Method_Annotation{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            List<SideLocation> right = r.rightFilter("added annotation");
+            refactoredLine(diffList, right, 'R');
+        }
+    },
+    Remove_Method_Annotation{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            List<SideLocation> left = r.leftFilter("removed annotation");
+            refactoredLine(diffList, left, 'L');
+        }
+    },
+    Modify_Method_Annotation{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            List<SideLocation> left = r.leftFilter("original annotation");
+            List<SideLocation> right = r.rightFilter("modified annotation");
+            refactoredLine(diffList, left, 'L');
+            refactoredLine(diffList, right, 'R');
+        }
+    },
+    Add_Method_Modifier{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            refactorFirstLine(r, mappings, diffList, r.getLeftSideLocations(), 'L');
+            refactorFirstLine(r, mappings, diffList, r.getRightSideLocations(), 'R');
+        }
+    },
+    Remove_Method_Modifier{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            refactorFirstLine(r, mappings, diffList, r.getLeftSideLocations(), 'L');
+            refactorFirstLine(r, mappings, diffList, r.getRightSideLocations(), 'R');
+        }
+    },
+    Change_Method_Access_Modifier{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            refactorFirstLine(r, mappings, diffList, r.getLeftSideLocations(), 'L');
+            refactorFirstLine(r, mappings, diffList, r.getRightSideLocations(), 'R');
+        }
+    },
+    Add_Thrown_Exception_Type{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            List<SideLocation> right = r.rightFilter("added thrown exception type");
+            refactoredLine(diffList, right, 'R');
+            refactorFirstLine(r, mappings, diffList, r.leftFilter("original method declaration"), 'L');
+            refactorFirstLine(r, mappings, diffList, r.rightFilter("method declaration with added thrown exception type"), 'R');
+        }
+    },
+    Remove_Thrown_Exception_Type{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            refactoredLine(diffList, r.leftFilter("removed thrown exception type"), 'L');
+            refactorFirstLine(r, mappings, diffList, r.leftFilter("original method declaration"), 'L');
+            refactorFirstLine(r, mappings, diffList, r.rightFilter("method declaration with removed thrown exception type"), 'R');
+        }
+    },
+    Change_Thrown_Exception_Type{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            refactoredLine(diffList, r.leftFilter("original exception type"), 'L');
+            refactoredLine(diffList, r.rightFilter("changed exception type"), 'R');
+        }
+    },
+    Rename_Parameter{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            refactoredLine(diffList, r.leftFilter("original variable declaration"), 'L');
+            refactoredLine(diffList, r.rightFilter("renamed variable declaration"), 'R');
+        }
+    },
+    Add_Parameter_Annotation{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            refactoredLine(diffList, r.leftFilter("original variable declaration"), 'L');
+            refactoredLine(diffList, r.rightFilter("variable declaration with added annotation"), 'R');
+            refactoredLine(diffList, r.rightFilter("added annotation"), 'R');
+        }
+    },
+    Remove_Parameter_Annotation{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            refactoredLine(diffList, r.leftFilter("removed annotation"), 'L');
+            refactoredLine(diffList, r.leftFilter("original variable declaration"), 'L');
+            refactoredLine(diffList, r.rightFilter("variable declaration with removed annotation"), 'R');
+        }
+    },
+    Modify_Parameter_Annotation{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            //todo no example
+        }
+    },
+    Add_Parameter_Modifier{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            refactoredLine(diffList, r.leftFilter("original variable declaration"), 'L');
+            refactoredLine(diffList, r.rightFilter("variable declaration with added modifier"), 'R');
+        }
+    },
+    Remove_Parameter_Modifier{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            refactoredLine(diffList, r.leftFilter("original variable declaration"), 'L');
+            refactoredLine(diffList, r.rightFilter("variable declaration with removed modifier"), 'R');
+        }
+    },
+    Localize_Parameter{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            refactoredLine(diffList, r.leftFilter("original variable declaration"), 'L');
+            refactoredLine(diffList, r.rightFilter("renamed variable declaration"), 'R');
+        }
+    },
+    Add_Attribute_Annotation{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            refactoredLine(diffList, r.getLeftSideLocations(), 'L');
+            refactoredLine(diffList, r.getRightSideLocations(), 'R');
+        }
+    },
+    Remove_Attribute_Annotation{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            refactoredLine(diffList, r.getLeftSideLocations(), 'L');
+            refactoredLine(diffList, r.getRightSideLocations(), 'R');
+        }
+    },
+    Modify_Attribute_Annotation{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            refactoredLine(diffList, r.getLeftSideLocations(), 'L');
+            refactoredLine(diffList, r.getRightSideLocations(), 'R');
+        }
+    },
+    Add_Attribute_Modifier{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            refactoredLine(diffList, r.getLeftSideLocations(), 'L');
+            refactoredLine(diffList, r.getRightSideLocations(), 'R');
+        }
+    },
+    Remove_Attribute_Modifier{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            refactoredLine(diffList, r.getLeftSideLocations(), 'L');
+            refactoredLine(diffList, r.getRightSideLocations(), 'R');
+        }
+    },
+    Change_Attribute_Access_Modifier{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            refactoredLine(diffList, r.getLeftSideLocations(), 'L');
+            refactoredLine(diffList, r.getRightSideLocations(), 'R');
+        }
+    },
+
+    Extract_Variable{
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList){
+            List<SideLocation> left = r.leftFilter("statement with the initializer of the extracted variable");
+            List<SideLocation> right = r.rightFilter("extracted variable declaration");
+            List<SideLocation> right2 = r.rightFilter("statement with the name of the extracted variable");
+            refactoredLine(diffList, left, 'L');
+            refactoredLine(diffList, right, 'R');
+            refactoredLine(diffList, right2, 'R');
+
+        }
+    },
+    Change_Variable_Type{
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            List<SideLocation> left = r.leftFilter("original variable declaration");
+            List<SideLocation> right = r.rightFilter("changed-type variable declaration");
+            refactoredLine(diffList, left, 'L');
+            refactoredLine(diffList, right, 'R');
+        }
+    },
+    Inline_Variable{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            List<SideLocation> left = r.leftFilter("inlined variable declaration");
+            List<SideLocation> left2 = r.leftFilter("statement with the name of the inlined variable");
+            List<SideLocation> right = r.rightFilter("statement with the initializer of the inlined variable");
+            refactoredLine(diffList, left, 'L');
+            refactoredLine(diffList, left2, 'L');
+            refactoredLine(diffList, right, 'R');
+
+        }
+    },
+    Rename_Variable{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            List<SideLocation> left = r.leftFilter("original variable declaration");
+            List<SideLocation> right = r.rightFilter("renamed variable declaration");
+            refactoredLine(diffList, left, 'L');
+            refactoredLine(diffList, right, 'R');
+        }
+    },
+    Merge_Variable{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            List<SideLocation> left = r.leftFilter("merged variable declaration");
+            List<SideLocation> right = r.rightFilter("new variable declaration");
+            refactoredLine(diffList, left, 'L');
+            refactoredLine(diffList, right, 'R');
+
+        }
+    },
+    Split_Variable{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            List<SideLocation> left = r.leftFilter("original variable declaration");
+            List<SideLocation> right = r.rightFilter("split variable declaration");
+            refactoredLine(diffList, left, 'L');
+            refactoredLine(diffList, right, 'R');
+        }
+    },
+    Add_Variable_Annotation{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            List<SideLocation> left = r.leftFilter("original variable declaration");
+            List<SideLocation> right = r.rightFilter("added annotation");
+            List<SideLocation> right2 = r.rightFilter("variable declaration with added annotation");
+            assert right2!=null;
+            refactoredLine(diffList,left, 'L');
+            refactoredLine(diffList, right, 'R');
+            refactoredLine(diffList, right2, 'R');
+        }
+    },
+    Remove_Variable_Annotation{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            List<SideLocation> left = r.leftFilter("removed annotation");
+            List<SideLocation> left2 = r.leftFilter("original variable declaration");
+            List<SideLocation> right = r.rightFilter("variable declaration with removed annotation");
+            refactoredLine(diffList,left, 'L');
+            refactoredLine(diffList, right, 'R');
+            refactoredLine(diffList, left2, 'L');
+        }
+    },
+    Modify_Variable_Annotation{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            List<SideLocation> left = r.leftFilter("original annotation");
+            List<SideLocation> left2 = r.leftFilter("original variable declaration");
+            List<SideLocation> right = r.rightFilter("modified annotation");
+            List<SideLocation> right2 = r.rightFilter("variable declaration with modified annotation");
+            refactoredLine(diffList,left, 'L');
+            refactoredLine(diffList,left2, 'L');
+            refactoredLine(diffList, right, 'R');
+            refactoredLine(diffList, right2, 'R');
+        }
+    },
+    Add_Variable_Modifier{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            List<SideLocation> left = r.leftFilter("original variable declaration");
+            List<SideLocation> right = r.rightFilter("variable declaration with added modifier");
+            refactoredLine(diffList, left, 'L');
+            refactoredLine(diffList, right, 'R');
+        }
+    },
+    Remove_Variable_Modifier{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            List<SideLocation> left = r.leftFilter("original variable declaration");
+            List<SideLocation> right = r.rightFilter("variable declaration with removed modifier");
+            refactoredLine(diffList, left, 'L');
+            refactoredLine(diffList, right, 'R');
+        }
+    },
+    Replace_Variable_With_Attribute{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            refactoredLine(diffList, r.leftFilter("original variable declaration"), 'L');
+            refactoredLine(diffList, r.rightFilter("renamed variable declaration"), 'R');
+        }
+    },
+    Replace_Loop_With_Pipeline{
+        @Override
+        public void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList) {
+            List<SideLocation> left = r.leftFilter("original code");
+            List<SideLocation> right = r.rightFilter("pipeline code");
+            refactoredLine(diffList, left, 'L');
+            refactoredLine(diffList, right, 'R');
+        }
+    }
+    ;
+    public abstract void apply(List<CodeBlock> codeBlocks, HashMap<String, CodeBlock> mappings, Refactoring r, CommitCodeChange commitTime, String name, List<DiffFile> diffList);
 
 }

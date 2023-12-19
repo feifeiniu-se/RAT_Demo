@@ -89,6 +89,7 @@ public class Visitor {
             CodeBlockTime oldTime = null;
             int startLine = cu.getLineNumber(enumDeclaration.getStartPosition());
             int endLine = cu.getLineNumber(enumDeclaration.getStartPosition() + enumDeclaration.getLength() - 1);
+            int declarationLine = cu.getLineNumber((enumDeclaration.getName().getStartPosition()));
 
             if (!mappings.containsKey(signature)) {
                 if(renameCodeBlockName.containsKey(signature) && mappings.containsKey(renameCodeBlockName.get(signature))){
@@ -120,12 +121,18 @@ public class Visitor {
             }
 
             if(classTime != null){
+                if(diffMap.containsKey(sourceFile)){
+                    diffMap.get(sourceFile).getTimes().add(classTime);
+                }
+
                 classTime.setNewStartLineNum(startLine);
                 classTime.setNewEndLineNum(endLine);
+                classTime.setNewDeclarationLineNum(declarationLine);
 
                 if(oldTime != null){
                     classTime.setOldStartLineNum(oldTime.getNewStartLineNum());
                     classTime.setOldEndLineNum(oldTime.getNewEndLineNum());
+                    classTime.setOldDeclarationLineNum(oldTime.getNewDeclarationLineNum());
                 }
             }
 
@@ -154,6 +161,7 @@ public class Visitor {
             CodeBlockTime oldTime = null;
             int startLine = cu.getLineNumber(typeDeclaration.getStartPosition());
             int endLine = cu.getLineNumber(typeDeclaration.getStartPosition() + typeDeclaration.getLength() - 1);
+            int declarationLine = cu.getLineNumber(typeDeclaration.getName().getStartPosition());
 
             if (!mappings.containsKey(signature)) {
                 if(renameCodeBlockName.containsKey(signature) && mappings.containsKey(renameCodeBlockName.get(signature))){
@@ -185,12 +193,18 @@ public class Visitor {
             }
 
             if(classTime != null){
+                if(diffMap.containsKey(sourceFile)){
+                    diffMap.get(sourceFile).getTimes().add(classTime);
+                }
+
                 classTime.setNewStartLineNum(startLine);
                 classTime.setNewEndLineNum(endLine);
+                classTime.setNewDeclarationLineNum(declarationLine);
 
                 if(oldTime != null){
                     classTime.setOldStartLineNum(oldTime.getNewStartLineNum());
                     classTime.setOldEndLineNum(oldTime.getNewEndLineNum());
+                    classTime.setOldDeclarationLineNum(oldTime.getNewDeclarationLineNum());
                 }
             }
 
@@ -280,6 +294,7 @@ public class Visitor {
             CodeBlockTime oldTime = null;
             int startLine = cu.getLineNumber(enumConstantDeclaration.getStartPosition());
             int endLine = cu.getLineNumber(enumConstantDeclaration.getStartPosition() + enumConstantDeclaration.getLength() - 1);
+            int declarationLine = cu.getLineNumber(enumConstantDeclaration.getName().getStartPosition());
 
             if (!mappings.containsKey(signature_attribute)) {
                 if(renameCodeBlockName.containsKey(signature_attribute) && mappings.containsKey(renameCodeBlockName.get(signature_attribute))){
@@ -311,12 +326,18 @@ public class Visitor {
 
 
             if(attriTime != null){
+                if(diffMap.containsKey(sourceFile)){
+                    diffMap.get(sourceFile).getTimes().add(attriTime);
+                }
+
                 attriTime.setNewStartLineNum(startLine);
                 attriTime.setNewEndLineNum(endLine);
+                attriTime.setNewDeclarationLineNum(declarationLine);
 
                 if(oldTime != null){
                     attriTime.setOldStartLineNum(oldTime.getNewStartLineNum());
                     attriTime.setOldEndLineNum(oldTime.getNewEndLineNum());
+                    attriTime.setOldDeclarationLineNum(oldTime.getNewDeclarationLineNum());
                 }
             }
         }
@@ -364,6 +385,7 @@ public class Visitor {
         CodeBlockTime oldTime = null;
         int startLine = cu.getLineNumber(md.getStartPosition());
         int endLine = cu.getLineNumber(md.getStartPosition() + md.getLength() - 1);
+        int declarationLine = cu.getLineNumber(md.getName().getStartPosition());
 
         if (!mappings.containsKey(signature_method)) {
             if(renameCodeBlockName.containsKey(signature_method) && mappings.containsKey(renameCodeBlockName.get(signature_method))){
@@ -397,12 +419,18 @@ public class Visitor {
         }
 
         if (methodTime != null){
+            if(diffMap.containsKey(sourceFile)){
+                diffMap.get(sourceFile).getTimes().add(methodTime);
+            }
+
             methodTime.setNewStartLineNum(startLine);
             methodTime.setNewEndLineNum(endLine);
+            methodTime.setNewDeclarationLineNum(declarationLine);
 
             if(oldTime != null){
                 methodTime.setOldStartLineNum(oldTime.getNewStartLineNum());
                 methodTime.setOldEndLineNum(oldTime.getNewEndLineNum());
+                methodTime.setOldDeclarationLineNum(oldTime.getNewDeclarationLineNum());
             }
         }
 
@@ -421,6 +449,8 @@ public class Visitor {
         CodeBlockTime oldTime = null;
         int startLine = cu.getLineNumber(fd.getStartPosition());
         int endLine = cu.getLineNumber(fd.getStartPosition() + fd.getLength() - 1);
+        VariableDeclarationFragment variableDeclarationFragment = (VariableDeclarationFragment)fd.fragments().get(index);
+        int declarationLine = cu.getLineNumber(variableDeclarationFragment.getStartPosition());
 
         if (!mappings.containsKey(signature_attribute)) {
             if(renameCodeBlockName.containsKey(signature_attribute) && mappings.containsKey(renameCodeBlockName.get(signature_attribute))){
@@ -452,12 +482,18 @@ public class Visitor {
 
 
         if(attriTime != null){
+            if(diffMap.containsKey(sourceFile)){
+                diffMap.get(sourceFile).getTimes().add(attriTime);
+            }
+
             attriTime.setNewStartLineNum(startLine);
             attriTime.setNewEndLineNum(endLine);
+            attriTime.setNewDeclarationLineNum(declarationLine);
 
             if(oldTime != null){
                 attriTime.setOldStartLineNum(oldTime.getNewStartLineNum());
                 attriTime.setOldEndLineNum(oldTime.getNewEndLineNum());
+                attriTime.setOldDeclarationLineNum(oldTime.getNewDeclarationLineNum());
             }
         }
     }

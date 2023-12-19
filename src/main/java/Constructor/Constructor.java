@@ -48,6 +48,7 @@ public class Constructor {
             Map<String, DiffFile> fileList = fileList1.entrySet().stream()
                     .filter(p -> !FileType.DELETE.equals(p.getValue().getType()))
                     .collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue()));
+            List<DiffFile> diffList = fileList.values().stream().toList();
 
             //if refactoring is not null, separate them into three levels: package, class, method&attribute
             Refactorings refact = project.getRefactorings().get(hashCode.getHashCode());
@@ -59,8 +60,8 @@ public class Constructor {
 
             RefactoringParser refactoringParser = new RefactoringParser();
             Map<String, String> renameCodeBlockName;
-            if (commitTime.getPreCommit() != null){
-                renameCodeBlockName = refactoringParser.parse(refact, mappings);
+            if (commitTime.getPreCommit() != null && refact != null){
+                renameCodeBlockName = refactoringParser.parse(refact.filter("rename"), mappings);
             } else {
                 renameCodeBlockName = new HashMap<>();
             }
@@ -75,7 +76,7 @@ public class Constructor {
                     List<Refactoring> packageLevelRefactorings = refact.filter("package");
                     if (!packageLevelRefactorings.isEmpty()) {
                         for(Refactoring r: packageLevelRefactorings){
-                            Operator.valueOf(r.getType().replace(" ", "_")).apply(codeBlocks, mappings, r, commitTime, null);
+                            Operator.valueOf(r.getType().replace(" ", "_")).apply(codeBlocks, mappings, r, commitTime, null, diffList);
                         }
                     }
                 }
@@ -93,7 +94,7 @@ public class Constructor {
                     List<Refactoring> classLevelRefactorings = refact.filter("class");
                     if (!classLevelRefactorings.isEmpty()) {
                         for(Refactoring r: classLevelRefactorings){
-                            Operator.valueOf(r.getType().replace(" ", "_")).apply(codeBlocks, mappings, r, commitTime, null);
+                            Operator.valueOf(r.getType().replace(" ", "_")).apply(codeBlocks, mappings, r, commitTime, null, diffList);
                         }
                     }
                 }
@@ -110,14 +111,14 @@ public class Constructor {
                     List<Refactoring> methodAndAttributeLevelRefactorings = refact.filter("methodAndAttribute");
                     if (!methodAndAttributeLevelRefactorings.isEmpty()) {
                         for(Refactoring r: methodAndAttributeLevelRefactorings){
-                            Operator.valueOf(r.getType().replace(" ", "_")).apply(codeBlocks, mappings, r, commitTime, null);
+                            Operator.valueOf(r.getType().replace(" ", "_")).apply(codeBlocks, mappings, r, commitTime, null, diffList);
                         }
                     }
                     //parameters & return type
                     List<Refactoring> parameterLevelRefactorings = refact.filter("parameter");
                     if (!parameterLevelRefactorings.isEmpty()) {
                         for(Refactoring r: parameterLevelRefactorings){
-                            Operator.valueOf(r.getType().replace(" ", "_")).apply(codeBlocks, mappings, r, commitTime, null);
+                            Operator.valueOf(r.getType().replace(" ", "_")).apply(codeBlocks, mappings, r, commitTime, null, diffList);
                         }
                     }
 
@@ -127,6 +128,22 @@ public class Constructor {
 //            methodAndAttributeVisitor.methodAAttributeVisitor(fileContents, repositoryDirectories, codeBlocks, codeChange, mappings, classVisitor);
 //            classVisitor.processResidualClass();
             updateMappings(mappings, codeBlocks);
+
+            if (refact != null && commitTime.getPreCommit() != null) {
+                if (!refact.getRefactorings().isEmpty()) {
+                    List<Refactoring> packageLevelRefactorings = refact.filter("others");
+                    if (!packageLevelRefactorings.isEmpty()) {
+                        for(Refactoring r: packageLevelRefactorings){
+                            Operator.valueOf(r.getType().replace(" ", "_")).apply(codeBlocks, mappings, r, commitTime, null, diffList);
+                        }
+                    }
+                }
+
+                for(DiffFile dfl: diffList){
+                    dfl.label();
+                }
+            }
+
         }
     }
 

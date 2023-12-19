@@ -2,10 +2,12 @@ package Constructor;
 
 
 import Constructor.Enums.CodeBlockType;
+import Constructor.Enums.OpeTypeEnum;
 import Constructor.Enums.Operator;
 import Model.*;
 import Project.RefactoringMiner.Refactoring;
 import Project.RefactoringMiner.SideLocation;
+import Project.Utils.DiffFile;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,11 +28,8 @@ public class Utils {
         return null;
     }
     public static String toRoot(String str){
-        if (!str.contains("...") && !str.contains("Map.Entry") && !str.contains("Version.Trajectory")){
-            str = str.substring(str.lastIndexOf(".")+1);
-        }
-        str = str.contains(", ")?str.replace(", ", ","):str;
-        return str;
+
+        return str.startsWith(".") ? str.substring(1) : str;
     }
     public static String defaultPackage(String classSignature){
 //        if(!classSignature.contains(".")){
@@ -163,4 +162,128 @@ public class Utils {
 //        res.put("PT", parameterTypes);
 //        return res;
 //    }
+
+    public static void refactoredLine(List<DiffFile> diffList, List<SideLocation> locations, char flag){
+        if(flag=='L'){
+            for(SideLocation l:locations){
+                DiffFile oldPath = findOldFile(diffList, l.getFilePath());
+                for(int i=l.getStartLine(); i<=l.getEndLine(); i++){
+                    oldPath.getOldCodeChangeLineLabel().put(i, OpeTypeEnum.R);
+                }
+            }
+        }else if(flag=='R'){
+            for(SideLocation l:locations){
+                DiffFile newPath = findFile(diffList, l.getFilePath());
+                for(int i=l.getStartLine(); i<=l.getEndLine(); i++){
+                    newPath.getCodeChangeLineLabel().put(i, OpeTypeEnum.R);
+                }
+            }
+        }
+    }
+    public static void refactorFirstLine(Refactoring r, HashMap<String, CodeBlock> mappings, List<DiffFile> diffList, List<SideLocation> locations, char flag){
+        if(flag=='L'){
+            for(SideLocation l:locations){
+                DiffFile oldPath = findOldFile(diffList, l.getFilePath());
+                String name = "";
+                CodeBlockTime c;
+                if(l.getCodeElementType().equals("METHOD_DECLARATION")){
+                    name = r.getLastClassName() + ":" + l.parseMethodDeclaration().get("MN");
+                    if(mappings.get(name)==null){
+                        return;
+                    }
+                    c = mappings.get(name).getLastHistory();
+                    oldPath.getOldCodeChangeLineLabel().put(c.getOldDeclarationLineNum(), OpeTypeEnum.R);
+                }else if(l.getCodeElementType().equals("TYPE_DECLARATION")){
+                    name = toRoot(l.getCodeElement());
+                    if(mappings.get(name)==null){
+                        return;
+                    }
+                    c = mappings.get(name).getLastHistory();
+                    oldPath.getOldCodeChangeLineLabel().put(c.getOldDeclarationLineNum(), OpeTypeEnum.R);
+                }else if(l.getCodeElementType().equals("FIELD_DECLARATION")){
+                    name = l.parseAttributeOrParameter();
+                    if(mappings.get(name)==null){
+                        return;
+                    }
+                    c = mappings.get(name).getLastHistory();
+                    oldPath.getOldCodeChangeLineLabel().put(c.getOldDeclarationLineNum(), OpeTypeEnum.R);
+                }
+                else{
+                    oldPath.getOldCodeChangeLineLabel().put(l.getStartLine(), OpeTypeEnum.R);
+                }
+
+            }
+        }else if(flag=='R'){
+            for(SideLocation l:locations){
+                DiffFile newPath = findFile(diffList, l.getFilePath());
+                String name = "";
+                CodeBlockTime c;
+                if(l.getCodeElementType().equals("METHOD_DECLARATION")){
+                    name = r.getLastClassName() + ":" + l.parseMethodDeclaration().get("MN");
+                    if(mappings.get(name)==null){
+                        return;
+                    }
+                    c = mappings.get(name).getLastHistory();
+                    newPath.getCodeChangeLineLabel().put(c.getNewDeclarationLineNum(), OpeTypeEnum.R);
+                }else if(l.getCodeElementType().equals("TYPE_DECLARATION")){
+                    name = toRoot(l.getCodeElement());
+                    if(mappings.get(name)==null){
+                        return;
+                    }
+                    c = mappings.get(name).getLastHistory();
+                    newPath.getCodeChangeLineLabel().put(c.getNewDeclarationLineNum(), OpeTypeEnum.R);
+                }else if(l.getCodeElementType().equals("FIELD_DECLARATION")){
+                    name = l.parseAttributeOrParameter();
+                    if(mappings.get(name)==null){
+                        return;
+                    }
+                    c = mappings.get(name).getLastHistory();
+                    newPath.getCodeChangeLineLabel().put(c.getNewDeclarationLineNum(), OpeTypeEnum.R);
+                }
+                else{
+                    newPath.getCodeChangeLineLabel().put(l.getStartLine(), OpeTypeEnum.R);
+                }
+            }
+        }
+    }
+
+    public static void refactoredLine(HashMap<String, CodeBlock> mappings, List<DiffFile> diffList, List<SideLocation> locations, char flag, OpeTypeEnum type){
+        if(flag=='L'){
+            for(SideLocation l:locations){
+                DiffFile oldPath = findOldFile(diffList, l.getFilePath());
+                for(int i=l.getStartLine(); i<=l.getEndLine(); i++){
+                    oldPath.getOldCodeChangeLineLabel().put(i, type);
+                }
+            }
+        }else if(flag=='R'){
+            for(SideLocation l:locations){
+                DiffFile newPath = findFile(diffList, l.getFilePath());
+                for(int i=l.getStartLine(); i<=l.getEndLine(); i++){
+                    newPath.getCodeChangeLineLabel().put(i, type);
+                }
+            }
+        }
+    }
+
+    public static DiffFile findOldFile(List<DiffFile> diffList, String filePath){
+        for(DiffFile f:diffList){
+            if(f.getOldPath().equals(filePath)){
+                return f;
+            }
+        }
+        System.out.println("error");
+        System.out.println(filePath);
+        return null;
+    }
+
+    public static DiffFile findFile(List<DiffFile> diffList, String filePath){
+        for(DiffFile f:diffList){
+            if(f.getPath().equals(filePath)){
+                return f;
+            }
+        }
+        System.out.println("error");
+        System.out.println(filePath);
+        return null;
+    }
 }

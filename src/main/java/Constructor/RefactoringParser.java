@@ -16,13 +16,12 @@ import static Constructor.Utils.*;
 import static Constructor.Utils.defaultPackage;
 
 public class RefactoringParser {
-    public Map<String, String> parse(Refactorings refactorings, HashMap<String, CodeBlock> mappings){
+    public Map<String, String> parse(List<Refactoring> refactoringList, HashMap<String, CodeBlock> mappings){
         Map<String, String> renameCodeBlockName = new HashMap<>();
-        if(refactorings == null){
+        if(refactoringList == null){
             return renameCodeBlockName;
         }
 
-        List<Refactoring> refactoringList = refactorings.getRefactorings();
         for(Refactoring r: refactoringList){
             RenameOperator.valueOf(r.getType().replace(" ", "_")).apply(renameCodeBlockName, r, mappings);
         }

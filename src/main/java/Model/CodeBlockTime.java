@@ -25,6 +25,10 @@ public abstract class CodeBlockTime implements Cloneable, Serializable {
     int oldEndLineNum = -1;
     int newStartLineNum = -1;
     int newEndLineNum = -1;
+    int oldDeclarationLineNum=-1;
+    int newDeclarationLineNum=-1;
+    HashMap<Integer, OpeTypeEnum> oldChangeLines;
+    HashMap<Integer, OpeTypeEnum> newChangeLines;
 
     public abstract String getSignature();
     public abstract Set<CodeBlock> getPackages();
@@ -41,9 +45,19 @@ public abstract class CodeBlockTime implements Cloneable, Serializable {
             codeBlockTime = (CodeBlockTime) super.clone();
             codeBlockTime.setDeriver(new HashSet<>(deriver));
             codeBlockTime.setDerivee(new HashSet<>(derivee));
+            codeBlockTime.setOldChangeLines(new HashMap<>());
+            codeBlockTime.setNewChangeLines(new HashMap<>());
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
         }
         return codeBlockTime;
+    }
+
+    public Boolean containsNew(Integer i){
+        return i>=newStartLineNum&&i<=newEndLineNum;
+    }
+
+    public Boolean containsOld(Integer i){
+        return i>=oldStartLineNum&&i<=oldEndLineNum;
     }
 }

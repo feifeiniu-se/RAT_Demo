@@ -52,50 +52,50 @@ public class Refactorings {//这是一个commit的内容
             "Collapse Hierarchy",
             "Replace Anonymous With Lambda",//done 暂时没找到 只发生在方法内部
             "Merge Class",
-            "Inline Attribute"
+            "Inline Attribute",
 
-//            "Extract Variable",
-//            "Inline Variable",
-//            "Rename Variable",
-//            "Rename Parameter",
-//            "Replace Variable With Attribute",
-//            "Replace Attribute (With Attribute)",//TODO 暂时没找到例子
-//            "Merge Variable",
-//            "Split Variable",
-//            "Change Variable Type",
-//            "Add Method Annotation",
-//            "Remove Method Annotation",
-//            "Modify Method Annotation",
-//            "Add Attribute Annotation",
-//            "Remove Attribute Annotation",
-//            "Modify Attribute Annotation",
-//            "Add Class Annotation",
-//            "Remove Class Annotation",
-//            "Modify Class Annotation",
-//            "Add Parameter Annotation",
-//            "Remove Parameter Annotation",
-//            "Modify Parameter Annotation",
-//            "Add Variable Annotation",
-//            "Remove Variable Annotation",
-//            "Modify Variable Annotation",
-//            "Add Thrown Exception Type",
-//            "Remove Thrown Exception Type",
-//            "Change Thrown Exception Type",
-//            "Change Method Access Modifier",
-//            "Change Attribute Access Modifier",
-//            "Add Method Modifier (final, static, abstract, synchronized)",
-//            "Remove Method Modifier (final, static, abstract, synchronized)",
-//            "Add Attribute Modifier (final, static, transient, volatile)",
-//            "Remove Attribute Modifier (final, static, transient, volatile)",
-//            "Add Variable Modifier (final)",
-//            "Add Parameter Modifier (final)",
-//            "Remove Variable Modifier (final)",
-//            "Remove Parameter Modifier (final)",
-//            "Change Class Access Modifier",
-//            "Add Class Modifier (final, static, abstract)",
-//            "Remove Class Modifier (final, static, abstract)",
-//            "Localize Parameter",
-//            "Replace Loop With Pipeline",
+            "Extract Variable",
+            "Inline Variable",
+            "Rename Variable",
+            "Rename Parameter",
+            "Replace Variable With Attribute",
+//            "Replace Attribute (With Attribute)",
+            "Merge Variable",
+            "Split Variable",
+            "Change Variable Type",
+            "Add Method Annotation",
+            "Remove Method Annotation",
+            "Modify Method Annotation",
+            "Add Attribute Annotation",
+            "Remove Attribute Annotation",
+            "Modify Attribute Annotation",
+            "Add Class Annotation",
+            "Remove Class Annotation",
+            "Modify Class Annotation",
+            "Add Parameter Annotation",
+            "Remove Parameter Annotation",
+            "Modify Parameter Annotation",
+            "Add Variable Annotation",
+            "Remove Variable Annotation",
+            "Modify Variable Annotation",
+            "Add Thrown Exception Type",
+            "Remove Thrown Exception Type",
+            "Change Thrown Exception Type",
+            "Change Method Access Modifier",
+            "Change Attribute Access Modifier",
+            "Add Method Modifier",
+            "Remove Method Modifier",
+            "Add Attribute Modifier",
+            "Remove Attribute Modifier",
+            "Add Variable Modifier",
+            "Add Parameter Modifier",
+            "Remove Variable Modifier",
+            "Remove Parameter Modifier",
+            "Change Class Access Modifier",
+            "Add Class Modifier",
+            "Remove Class Modifier",
+            "Localize Parameter",
+            "Replace Loop With Pipeline"
     ));
 
     /**
@@ -159,6 +159,99 @@ public class Refactorings {//这是一个commit的内容
             "Split Package",
             "Merge Package"
     ));
+    private static Set<String> renameLevelTypes = new HashSet<>(Arrays.asList(
+            "Rename Package",
+            "Move Package",
+            "Split Package",
+            "Merge Package",
+
+            "Extract Superclass",
+            "Extract Interface",
+            "Move Class",
+            "Rename Class",
+            "Move And Rename Class",
+            "Extract Class",
+            "Extract Subclass",
+            "Change Type Declaration Kind",
+            "Collapse Hierarchy",
+            "Merge Class",
+
+            "Extract Method",
+            "Inline Method",
+            "Rename Method",
+            "Move Method",
+            "Pull Up Method",
+            "Push Down Method",
+            "Extract And Move Method",
+            "Move And Rename Method",
+            "Move And Inline Method",
+            "Pull Up Attribute",
+            "Push Down Attribute",
+            "Move And Rename Attribute",
+            "Move Attribute",
+            "Merge Attribute",
+            "Split Attribute",
+            "Extract Attribute",
+            "Encapsulate Attribute",
+            "Replace Attribute With Variable",
+            "Inline Attribute",
+
+            "Parameterize Variable",
+            "Merge Parameter",
+            "Split Parameter",
+            "Change Parameter Type",
+            "Add Parameter",
+            "Remove Parameter",
+            "Reorder Parameter",
+            "Parameterize Attribute",
+            "Change Return Type",
+            "Rename Attribute",
+            "Change Attribute Type"
+    ));
+    private static Set<String> othersLevelTypes = new HashSet<>(Arrays.asList(
+            "Extract Variable",
+            "Inline Variable",
+            "Rename Variable",
+            "Rename Parameter",
+            "Replace Variable With Attribute",
+//            "Replace Attribute (With Attribute)",
+            "Merge Variable",
+            "Split Variable",
+            "Change Variable Type",
+            "Add Method Annotation",
+            "Remove Method Annotation",
+            "Modify Method Annotation",
+            "Add Attribute Annotation",
+            "Remove Attribute Annotation",
+            "Modify Attribute Annotation",
+            "Add Class Annotation",
+            "Remove Class Annotation",
+            "Modify Class Annotation",
+            "Add Parameter Annotation",
+            "Remove Parameter Annotation",
+            "Modify Parameter Annotation",
+            "Add Variable Annotation",
+            "Remove Variable Annotation",
+            "Modify Variable Annotation",
+            "Add Thrown Exception Type",
+            "Remove Thrown Exception Type",
+            "Change Thrown Exception Type",
+            "Change Method Access Modifier",
+            "Change Attribute Access Modifier",
+            "Add Method Modifier",
+            "Remove Method Modifier",
+            "Add Attribute Modifier",
+            "Remove Attribute Modifier",
+            "Add Variable Modifier",
+            "Add Parameter Modifier",
+            "Remove Variable Modifier",
+            "Remove Parameter Modifier",
+            "Change Class Access Modifier",
+            "Add Class Modifier",
+            "Remove Class Modifier",
+            "Localize Parameter",
+            "Replace Loop With Pipeline"
+    ));
     public List<Refactoring> filter(String types){
         List<Refactoring> res = new ArrayList<>();
         if(types.equals("package")){
@@ -184,6 +277,18 @@ public class Refactorings {//这是一个commit的内容
         }else if(types.equals("parameter")){
             for(Refactoring r:refactorings){
                 if(parameterLevelTypes.contains(r.getType())){
+                    res.add(r);
+                }
+            }
+        }else if(types.equals("rename")){
+            for(Refactoring r:refactorings){
+                if(renameLevelTypes.contains(r.getType())){
+                    res.add(r);
+                }
+            }
+        }else if(types.equals("others")){
+            for(Refactoring r:refactorings){
+                if(othersLevelTypes.contains(r.getType())){
                     res.add(r);
                 }
             }

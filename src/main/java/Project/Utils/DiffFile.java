@@ -1,11 +1,11 @@
 package Project.Utils;
 import Constructor.Enums.FileType;
+import Constructor.Enums.OpeTypeEnum;
+import Model.CodeBlockTime;
 import lombok.Data;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.lang.Math.abs;
 
@@ -19,7 +19,10 @@ public class DiffFile {
     String oldContent;
     String patch;
     List<Integer> codeChangeLineNum;
+    HashMap<Integer, OpeTypeEnum> codeChangeLineLabel;
     List<Integer> oldCodeChangeLineNum;
+    HashMap<Integer, OpeTypeEnum> oldCodeChangeLineLabel;
+    List<CodeBlockTime> times;
 
 
 
@@ -29,6 +32,9 @@ public class DiffFile {
         this.content = content;
         this.oldPath = null;
         this.oldContent = null;
+        this.codeChangeLineLabel = new HashMap<>();
+        this.oldCodeChangeLineLabel = new HashMap<>();
+        this.times = new ArrayList<>();
     }
     public DiffFile(FileType type, String path, String content, String oldPath, String oldContent){
         this.type = type;
@@ -36,6 +42,9 @@ public class DiffFile {
         this.content = content;
         this.oldPath = oldPath;
         this.oldContent = oldContent;
+        this.codeChangeLineLabel = new HashMap<>();
+        this.oldCodeChangeLineLabel = new HashMap<>();
+        this.times = new ArrayList<>();
     }
 
     public void patchParser(){
@@ -75,5 +84,38 @@ public class DiffFile {
 
     public boolean containsChangeLine(int line){
         return oldCodeChangeLineNum.contains(line) || codeChangeLineNum.contains(line);
+    }
+
+    public void label(){
+        for(Integer i: codeChangeLineNum){
+            if(!codeChangeLineLabel.containsKey(i)){
+                codeChangeLineLabel.put(i, OpeTypeEnum.A);
+            }
+        }
+        for(Integer i: oldCodeChangeLineNum){
+            if(!oldCodeChangeLineLabel.containsKey(i)){
+                oldCodeChangeLineLabel.put(i,OpeTypeEnum.D);
+            }
+        }
+        System.out.println(114514);
+        label_(codeChangeLineNum, codeChangeLineLabel, true);
+        label_(oldCodeChangeLineNum, oldCodeChangeLineLabel, false);
+    }
+
+    private void label_(List<Integer> nums, HashMap<Integer, OpeTypeEnum> lineLabel, boolean isNew) {
+        for(Integer i: nums){
+            OpeTypeEnum type = lineLabel.get(i);
+
+            if(times==null){
+                continue;
+            }
+            for(CodeBlockTime c: times){
+                if (isNew && c.containsNew(i)){
+                    c.getNewChangeLines().put(i, type);
+                } else if (!isNew && c.containsOld(i)){
+                    c.getOldChangeLines().put(i, type);
+                }
+            }
+        }
     }
 }
